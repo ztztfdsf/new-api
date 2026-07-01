@@ -3,7 +3,6 @@ package controller
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/i18n"
@@ -70,7 +69,6 @@ func ListInvitationCodes(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgDatabaseError)
 		return
 	}
-	now := time.Now().Unix()
 	for i := range codes {
 		codes[i].Note = maskCode(codes[i].Code, codes[i].Note)
 		codes[i].Code = maskCode(codes[i].Code, "")

@@ -11,6 +11,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
+	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/gin-gonic/gin"
 )
@@ -58,6 +59,10 @@ type BackupData struct {
 	Version    int                `json:"version"`
 	ExportedAt int64              `json:"exported_at"`
 	Tables     map[string][]byte  `json:"tables"`
+}
+
+type BackupRestoreRequest struct {
+	Data BackupData `json:"data"`
 }
 
 // ExportBackup exports all tables as a JSON file download. Root only.
