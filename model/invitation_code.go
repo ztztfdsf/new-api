@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-
-	"github.com/QuantumNous/new-api/common"
 )
 
 const invitationCodeLength = 10
