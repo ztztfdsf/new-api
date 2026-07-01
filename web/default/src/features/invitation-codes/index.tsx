@@ -16,18 +16,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useState, useEffect, useCallback } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import type { ColumnDef } from '@tanstack/react-table'
 
 import { SectionPageLayout } from '@/components/layout'
+import {
+  DataTablePage,
+  useDataTable,
+} from '@/components/data-table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DataTable } from '@/components/data-table'
-import type { ColumnDef } from '@tanstack/react-table'
 
 import { api } from '@/lib/api'
 import { ROLE } from '@/lib/roles'
@@ -49,7 +52,7 @@ function formatDate(ts: number): string {
   return new Date(ts * 1000).toLocaleString()
 }
 
-function getStatus(inv: InvitationCodeItem): string {
+function getStatus(inv: InvitationCodeItem): 'available' | 'used' | 'expired' {
   if (inv.invitee_id !== 0) return 'used'
   if (inv.expires_at > 0 && Date.now() / 1000 > inv.expires_at) return 'expired'
   return 'available'
@@ -107,14 +110,29 @@ export function InvitationCodes() {
     },
   })
 
+  const items: InvitationCodeItem[] = data?.data?.items || []
+  const total = data?.data?.total || 0
+  const pageSize = 20
+  const pageCount = Math.ceil(total / pageSize) || 1
+
   const columns: ColumnDef<InvitationCodeItem>[] = [
-    { accessorKey: 'code', header: t('Invitation code') },
-    { accessorKey: 'note', header: t('Note (optional)') },
+    {
+      accessorKey: 'code',
+      header: t('Invitation code'),
+      cell: (row) => (
+        <span className='font-mono text-sm'>{row.original.code}</span>
+      ),
+    },
+    {
+      accessorKey: 'note',
+      header: t('Note'),
+      cell: (row) => row.original.note || '-',
+    },
     {
       id: 'status',
       header: t('Status'),
-      cell: ({ row }) => {
-        const status = getStatus(row.original)
+      cell: (row) => {
+        const s = getStatus(row.original)
         const labels: Record<string, string> = {
           available: t('Not used'),
           used: t('Used'),
@@ -126,34 +144,68 @@ export function InvitationCodes() {
           expired: 'bg-red-100 text-red-800',
         }
         return (
-          <span className={`rounded px-2 py-0.5 text-xs ${colors[status]}`}>
-            {labels[status] || status}
+          <span className={`rounded px-2 py-0.5 text-xs ${colors[s]}`}>
+            {labels[s] || s}
           </span>
         )
       },
     },
-    { accessorKey: 'expires_at', header: t('Expires'), cell: ({ row }) => formatDate(row.original.expires_at) },
-    { accessorKey: 'used_at', header: t('Used'), cell: ({ row }) => formatDate(row.original.used_at) },
-    { accessorKey: 'created_at', header: t('Created'), cell: ({ row }) => formatDate(row.original.created_at) },
+    {
+      accessorKey: 'expires_at',
+      header: t('Expires'),
+      cell: (row) => formatDate(row.original.expires_at),
+    },
+    {
+      accessorKey: 'used_at',
+      header: t('Used'),
+      cell: (row) => formatDate(row.original.used_at),
+    },
+    {
+      accessorKey: 'created_at',
+      header: t('Created'),
+      cell: (row) => formatDate(row.original.created_at),
+    },
     {
       id: 'actions',
       header: '',
-      cell: ({ row }) => (
-        <Button
-          variant='ghost'
-          size='sm'
-          onClick={() => {
-            const baseUrl = window.location.origin
-            const link = `${baseUrl}/sign-up?invite=${row.original.code}`
-            navigator.clipboard.writeText(link)
-            toast.success(t('Copy link'))
-          }}
-        >
-          {t('Copy link')}
-        </Button>
+      cell: (row) => (
+        <div className='flex gap-1'>
+          <Button
+            variant='ghost'
+            size='sm'
+            onClick={() => {
+              const link = `${window.location.origin}/sign-up?invite=${row.original.code}`
+              navigator.clipboard.writeText(link)
+              toast.success(t('Copy link'))
+            }}
+          >
+            {t('Copy link')}
+          </Button>
+          <Button
+            variant='ghost'
+            size='sm'
+            onClick={() => {
+              if (confirm(t('Delete this invitation code?'))) {
+                deleteMutation.mutate(row.original.id)
+              }
+            }}
+          >
+            {t('Delete')}
+          </Button>
+        </div>
       ),
     },
   ]
+
+  const table = useDataTable<InvitationCodeItem>({
+    data: items,
+    columns,
+    pageCount,
+    pageIndex: page - 1,
+    onPaginationChange: (newPage) => setPage(newPage + 1),
+    totalCount: total,
+    manualPagination: true,
+  })
 
   if (!isSuperAdmin) {
     return (
@@ -168,8 +220,6 @@ export function InvitationCodes() {
     )
   }
 
-  const items = data?.data?.items || []
-
   return (
     <SectionPageLayout>
       <SectionPageLayout.Title>{t('Invitation code list')}</SectionPageLayout.Title>
@@ -181,7 +231,7 @@ export function InvitationCodes() {
             </CardHeader>
             <CardContent className='flex flex-wrap gap-3'>
               <div className='flex flex-col gap-1'>
-                <Label>{t('Expiration time (unix timestamp, 0 = no expiry)')}</Label>
+                <Label>{t('Expiration date (optional)')}</Label>
                 <Input
                   type='datetime-local'
                   value={expiresAt}
@@ -198,7 +248,7 @@ export function InvitationCodes() {
                 />
               </div>
               <div className='flex flex-col gap-1'>
-                <Label>{t('Quantity (1-100)')}</Label>
+                <Label>{t('Quantity')}</Label>
                 <Input
                   type='number'
                   min={1}
@@ -213,19 +263,18 @@ export function InvitationCodes() {
                   onClick={() => createMutation.mutate()}
                   disabled={createMutation.isPending}
                 >
-                  {createMutation.isPending ? t('Restoring…') : t('Create invitation codes')}
+                  {createMutation.isPending ? t('Creating…') : t('Create')}
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          <DataTable
+          <DataTablePage
+            table={table}
             columns={columns}
-            data={items}
-            pageCount={data?.data?.total ? Math.ceil(data.data.total / 20) : 1}
-            pageIndex={page - 1}
-            onPageChange={(idx) => setPage(idx + 1)}
-            isLoading={isLoading}
+            isLoading={isLoading || createMutation.isPending || deleteMutation.isPending}
+            emptyTitle={t('No invitation codes')}
+            emptyDescription={t('Create your first invitation code above')}
           />
         </div>
       </SectionPageLayout.Content>
