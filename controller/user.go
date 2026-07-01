@@ -184,27 +184,35 @@ func Register(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgUserPasswordRegisterDisabled)
 		return
 	}
-	var user model.User
-	err := json.NewDecoder(c.Request.Body).Decode(&user)
-	if err != nil {
+	var req struct {
+		Username         string `json:"username"`
+		Password         string `json:"password"`
+		InvitationCode   string `json:"invitation_code"`
+		Email            string `json:"email"`
+		VerificationCode string `json:"verification_code"`
+	}
+	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
 		return
 	}
-	if err := common.Validate.Struct(&user); err != nil {
+	if err := common.Validate.Struct(&model.User{
+		Username: req.Username,
+		Password: req.Password,
+	}); err != nil {
 		common.ApiErrorI18n(c, i18n.MsgUserInputInvalid, map[string]any{"Error": err.Error()})
 		return
 	}
 	if common.EmailVerificationEnabled {
-		if user.Email == "" || user.VerificationCode == "" {
+		if req.Email == "" || req.VerificationCode == "" {
 			common.ApiErrorI18n(c, i18n.MsgUserEmailVerificationRequired)
 			return
 		}
-		if !common.VerifyCodeWithKey(user.Email, user.VerificationCode, common.EmailVerificationPurpose) {
+		if !common.VerifyCodeWithKey(req.Email, req.VerificationCode, common.EmailVerificationPurpose) {
 			common.ApiErrorI18n(c, i18n.MsgUserVerificationCodeError)
 			return
 		}
 	}
-	exist, err := model.CheckUserExistOrDeleted(user.Username, user.Email)
+	exist, err := model.CheckUserExistOrDeleted(req.Username, req.Email)
 	if err != nil {
 		common.ApiErrorI18n(c, i18n.MsgDatabaseError)
 		common.SysLog(fmt.Sprintf("CheckUserExistOrDeleted error: %v", err))
@@ -214,30 +222,44 @@ func Register(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgUserExists)
 		return
 	}
-	affCode := user.AffCode // this code is the inviter's code, not the user's own code
-	inviterId, _ := model.GetUserIdByAffCode(affCode)
+	// Validate invitation code (required)
+	valid, msgKey := model.ValidateInvitationCode(req.InvitationCode)
+	if !valid {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": i18n.T(c, msgKey),
+		})
+		return
+	}
+	invCode, _ := model.GetInvitationByCode(req.InvitationCode)
+	inviterId := 0
+	if invCode != nil {
+		inviterId = invCode.CreatedBy
+	}
 	cleanUser := model.User{
-		Username:    user.Username,
-		Password:    user.Password,
-		DisplayName: user.Username,
+		Username:    req.Username,
+		Password:    req.Password,
+		DisplayName: req.Username,
 		InviterId:   inviterId,
-		Role:        common.RoleCommonUser, // 明确设置角色为普通用户
+		Role:        common.RoleCommonUser,
 	}
 	if common.EmailVerificationEnabled {
-		cleanUser.Email = user.Email
+		cleanUser.Email = req.Email
 	}
 	if err := cleanUser.Insert(inviterId); err != nil {
 		common.ApiError(c, err)
 		return
 	}
 
-	// 获取插入后的用户ID
 	var insertedUser model.User
 	if err := model.DB.Where("username = ?", cleanUser.Username).First(&insertedUser).Error; err != nil {
 		common.ApiErrorI18n(c, i18n.MsgUserRegisterFailed)
 		return
 	}
-	// 生成默认令牌
+	// Mark invitation as used
+	if err := model.MarkInvitationUsed(req.InvitationCode, insertedUser.Id); err != nil {
+		common.SysLog(fmt.Sprintf("failed to mark invitation code used: %v", err))
+	}
 	if constant.GenerateDefaultToken {
 		key, err := common.GenerateKey()
 		if err != nil {
@@ -245,15 +267,14 @@ func Register(c *gin.Context) {
 			common.SysLog("failed to generate token key: " + err.Error())
 			return
 		}
-		// 生成默认令牌
 		token := model.Token{
-			UserId:             insertedUser.Id, // 使用插入后的用户ID
+			UserId:             insertedUser.Id,
 			Name:               cleanUser.Username + "的初始令牌",
 			Key:                key,
 			CreatedTime:        common.GetTimestamp(),
 			AccessedTime:       common.GetTimestamp(),
-			ExpiredTime:        -1,     // 永不过期
-			RemainQuota:        500000, // 示例额度
+			ExpiredTime:        -1,
+			RemainQuota:        500000,
 			UnlimitedQuota:     true,
 			ModelLimitsEnabled: false,
 		}

@@ -43,14 +43,15 @@ import { buildSetupPayload, getSetupStatus, submitSetup } from './api'
 import { AdminStep } from './components/admin-step'
 import { CompleteStep } from './components/complete-step'
 import { DatabaseStep } from './components/database-step'
+import { RestoreStep } from './components/restore-step'
 import { StepNavigation } from './components/step-navigation'
 import { UsageModeStep } from './components/usage-mode-step'
 import type { SetupFormValues, SetupStatus } from './types'
 
 const STEPS = [
   {
-    titleKey: 'Database check',
-    descriptionKey: 'Verify your database connection',
+    titleKey: 'Restore from backup',
+    descriptionKey: 'Upload a backup or skip to start fresh',
   },
   {
     titleKey: 'Administrator account',
@@ -188,7 +189,15 @@ export function SetupWizard() {
 
   const currentStepComponent = useMemo(() => {
     if (currentStep === 0) {
-      return <DatabaseStep status={setupStatus} />
+      return <RestoreStep
+        onRestored={() => {
+          if (setupStatus?.root_init) {
+            setCurrentStep(3)
+          } else {
+            setCurrentStep(1)
+          }
+        }}
+      />
     }
     if (currentStep === 1) {
       return (

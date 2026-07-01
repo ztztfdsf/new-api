@@ -103,6 +103,16 @@ user.telegram_not_bound: "This Telegram account is not bound"
 user.linux_do_id_empty: "Linux DO ID is empty!"
 user.quota_change_zero: "Quota change amount cannot be zero"
 
+# Invitation messages
+invitation.code_required: "Invitation code is required"
+invitation.code_invalid: "Invitation code does not exist"
+invitation.code_used: "Invitation code has already been used"
+invitation.code_expired: "Invitation code has expired"
+invitation.created_success: "Invitation code created successfully"
+invitation.deleted_success: "Invitation code deleted successfully"
+invitation.id_required: "Invitation code ID is required"
+invitation.invalid_count: "Batch count must be between 1 and 100"
+
 # Quota messages
 quota.negative: "Quota cannot be negative!"
 quota.exceed_max: "Quota value exceeds valid range"

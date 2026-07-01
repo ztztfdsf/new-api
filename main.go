@@ -321,6 +321,9 @@ func InitResources() error {
 	// 启动系统监控
 	common.StartSystemMonitor()
 
+	// 启动自动日志清理
+	service.StartLogAutoCleanup()
+
 	// Initialize i18n
 	err = i18n.Init()
 	if err != nil {

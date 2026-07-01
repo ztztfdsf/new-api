@@ -99,10 +99,7 @@ export function SignUpForm({
   const hasUserAgreement = Boolean(status?.user_agreement_enabled)
   const hasPrivacyPolicy = Boolean(status?.privacy_policy_enabled)
   const requiresLegalConsent = hasUserAgreement || hasPrivacyPolicy
-  const oauthRegisterEnabled =
-    status?.oauth_register_enabled ??
-    status?.data?.oauth_register_enabled ??
-    true
+  const oauthRegisterEnabled = false // OAuth registration disabled
   const hasWeChatLogin = Boolean(status?.wechat_login)
   const turnstileReady = !isTurnstileEnabled || Boolean(turnstileToken)
 
@@ -133,7 +130,11 @@ export function SignUpForm({
     if (aff) {
       saveAffiliateCode(aff)
     }
-  }, [])
+    const invite = new URLSearchParams(window.location.search).get('invite')?.trim()
+    if (invite) {
+      form.setValue('invitation_code', invite)
+    }
+  }, [form])
 
   async function onSubmit(data: z.infer<typeof registerFormSchema>) {
     if (requiresLegalConsent && !agreedToLegal) {
@@ -160,9 +161,9 @@ export function SignUpForm({
       const res = await register({
         username: data.username,
         password: data.password,
+        invitation_code: data.invitation_code,
         email: data.email || undefined,
         verification_code: verificationCode || undefined,
-        aff_code: getAffiliateCode(),
         turnstile: turnstileToken,
       })
 
@@ -273,6 +274,27 @@ export function SignUpForm({
               <FormControl>
                 <PasswordInput placeholder={t('Confirm password')} {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Invitation Code Field */}
+        <FormField
+          control={form.control}
+          name='invitation_code'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('Invitation code')}</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder={t('Enter invitation code')}
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                {t('Required. Contact an administrator to get an invitation code.')}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

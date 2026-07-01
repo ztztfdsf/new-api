@@ -22,7 +22,6 @@ import type { SetupFormValues, SetupResponse } from './types'
 
 export async function getSetupStatus(): Promise<SetupResponse> {
   const res = await api.get('/api/setup', {
-    // We want fresh status on every visit.
     params: {
       t: Date.now(),
     },
@@ -34,6 +33,17 @@ export async function submitSetup(
   payload: Record<string, unknown>
 ): Promise<SetupResponse> {
   const res = await api.post('/api/setup', payload)
+  return res.data
+}
+
+export async function restoreBackup(file: File): Promise<SetupResponse> {
+  const formData = new FormData()
+  formData.append('file', file)
+  const res = await api.post('/api/setup/restore', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
   return res.data
 }
 

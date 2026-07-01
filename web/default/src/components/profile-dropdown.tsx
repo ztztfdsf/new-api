@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useNavigate } from '@tanstack/react-router'
-import { User, Wallet, LogOut, Settings } from 'lucide-react'
+import { Download, User, Wallet, LogOut, Settings } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -37,6 +37,7 @@ import { useUserDisplay } from '@/hooks/use-user-display'
 import { getUserAvatarFallback, getUserAvatarStyle } from '@/lib/avatar'
 import { ROLE } from '@/lib/roles'
 import { useAuthStore } from '@/stores/auth-store'
+import { api } from '@/lib/api'
 
 const avatarFallbackClassName = 'font-semibold text-white'
 
@@ -125,6 +126,28 @@ export function ProfileDropdown() {
             >
               <Settings className='size-4' />
               {t('System Settings')}
+            </DropdownMenuItem>
+          )}
+
+          {isSuperAdmin && (
+            <DropdownMenuItem onClick={() => {
+              api.get('/api/performance/backup/export', {
+                responseType: 'blob',
+              }).then((res) => {
+                const url = window.URL.createObjectURL(new Blob([res.data]))
+                const link = document.createElement('a')
+                link.href = url
+                link.download = 'backup.json'
+                document.body.appendChild(link)
+                link.click()
+                window.URL.revokeObjectURL(url)
+                document.body.removeChild(link)
+              }).catch(() => {
+                toast.error(t('Failed to export backup'))
+              })
+            }}>
+              <Download className='size-4' />
+              {t('Export backup')}
             </DropdownMenuItem>
           )}
 

@@ -114,6 +114,16 @@ const (
 	MsgUserTelegramNotBound          = "user.telegram_not_bound"
 	MsgUserLinuxDOIdEmpty            = "user.linux_do_id_empty"
 	MsgUserQuotaChangeZero           = "user.quota_change_zero"
+
+	// Invitation code messages
+	MsgInvitationCodeRequired        = "invitation.code_required"
+	MsgInvitationCodeInvalid         = "invitation.code_invalid"
+	MsgInvitationCodeUsed            = "invitation.code_used"
+	MsgInvitationCodeExpired         = "invitation.code_expired"
+	MsgInvitationCreatedSuccess      = "invitation.created_success"
+	MsgInvitationDeletedSuccess      = "invitation.deleted_success"
+	MsgInvitationIdRequired          = "invitation.id_required"
+	MsgInvitationInvalidCount        = "invitation.invalid_count"
 )
 
 // Quota related messages
