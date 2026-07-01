@@ -47,8 +47,8 @@ const DEFAULT_SIDEBAR_MODULES: SidebarModulesAdminConfig = {
     detail: true,
     token: true,
     log: true,
-    midjourney: true,
-    task: true,
+    midjourney: false,
+    task: false,
   },
   personal: {
     enabled: true,

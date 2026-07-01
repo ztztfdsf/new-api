@@ -32,7 +32,7 @@ import { PlaygroundInputControls } from './playground-input-controls'
 import { PlaygroundInputTools } from './playground-input-tools'
 
 interface PlaygroundInputProps {
-  onSubmit: (text: string) => void
+  onSubmit: (text: string, imageUrls?: string[]) => void
   onStop?: () => void
   disabled?: boolean
   isGenerating?: boolean
@@ -64,13 +64,19 @@ export function PlaygroundInput({
 }: PlaygroundInputProps) {
   const { t } = useTranslation()
   const [text, setText] = useState('')
+  const [imageUrls, setImageUrls] = useState<string[]>([])
 
   const handleSubmit = (message: PromptInputMessage) => {
     const submittableText = getSubmittableInputText(message, disabled)
 
-    if (!submittableText) return
-    onSubmit(submittableText)
+    if (!submittableText && imageUrls.length === 0) return
+    onSubmit(submittableText || '', imageUrls.length > 0 ? imageUrls : undefined)
     setText('')
+    setImageUrls([])
+  }
+
+  const handleImageSelected = (urls: string[]) => {
+    setImageUrls((prev) => [...prev, ...urls])
   }
 
   return (
@@ -110,6 +116,7 @@ export function PlaygroundInput({
                 disabled={disabled}
                 hasMessages={hasMessages}
                 onClearMessages={onClearMessages}
+                onImageSelected={handleImageSelected}
               />
             }
           />

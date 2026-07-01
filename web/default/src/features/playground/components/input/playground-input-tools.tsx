@@ -16,8 +16,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { GlobeIcon, PaperclipIcon, Trash2Icon } from 'lucide-react'
-import { useState } from 'react'
+import { ImageIcon, Trash2Icon } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
@@ -27,47 +27,58 @@ import {
 } from '@/components/ai-elements/prompt-input'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-import {
-  ATTACHMENT_ACTIONS,
-  getAttachmentActionNotice,
-  getSearchActionNotice,
-} from '../../lib'
-
 type PlaygroundInputToolsProps = {
   disabled?: boolean
   hasMessages?: boolean
   onClearMessages?: () => void
+  onImageSelected?: (dataUrls: string[]) => void
 }
 
 export function PlaygroundInputTools({
   disabled,
   hasMessages = false,
   onClearMessages,
+  onImageSelected,
 }: PlaygroundInputToolsProps) {
   const { t } = useTranslation()
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleFileAction = (action: string) => {
-    const notice = getAttachmentActionNotice(action)
-    toast.info(t(notice.title), {
-      description: notice.description,
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    const readers: Promise<string>[] = []
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      if (!file.type.startsWith('image/')) {
+        toast.error(t('Please select image files only'))
+        continue
+      }
+      readers.push(
+        new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
+      )
+    }
+
+    Promise.all(readers).then((dataUrls) => {
+      if (dataUrls.length > 0) {
+        onImageSelected?.(dataUrls)
+      }
     })
-  }
 
-  const handleSearchAction = () => {
-    const notice = getSearchActionNotice()
-    toast.info(t(notice.title))
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   const handleClearMessages = () => {
@@ -80,58 +91,34 @@ export function PlaygroundInputTools({
     <>
       <PromptInputTools className='bg-background/70 border-border/60 rounded-lg border p-1 shadow-xs'>
         <Tooltip>
-          <DropdownMenu>
-            <TooltipTrigger
-              render={
-                <DropdownMenuTrigger
-                  render={
-                    <PromptInputButton
-                      aria-label={t('Attach')}
-                      className='text-muted-foreground hover:text-foreground hover:bg-muted/70 font-medium'
-                      disabled={disabled}
-                      variant='ghost'
-                    />
-                  }
-                >
-                  <PaperclipIcon size={16} />
-                </DropdownMenuTrigger>
-              }
-            />
-            <TooltipContent>
-              <p>{t('Attach')}</p>
-            </TooltipContent>
-            <DropdownMenuContent align='start'>
-              {ATTACHMENT_ACTIONS.map(({ action, icon: Icon, label }) => (
-                <DropdownMenuItem
-                  key={action}
-                  onClick={() => handleFileAction(action)}
-                >
-                  <Icon className='mr-2' size={16} />
-                  {t(label)}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </Tooltip>
-
-        <Tooltip>
           <TooltipTrigger
             render={
               <PromptInputButton
-                aria-label={t('Search')}
+                aria-label={t('Upload image')}
                 className='text-muted-foreground hover:text-foreground hover:bg-muted/70 font-medium'
                 disabled={disabled}
-                onClick={handleSearchAction}
                 variant='ghost'
+                onClick={() => fileInputRef.current?.click()}
               >
-                <GlobeIcon size={16} />
+                <ImageIcon size={16} />
               </PromptInputButton>
             }
-          />
+          >
+            <p>{t('Upload image')}</p>
+          </TooltipTrigger>
           <TooltipContent>
-            <p>{t('Search')}</p>
+            <p>{t('Click to select or drag an image here')}</p>
           </TooltipContent>
         </Tooltip>
+
+        <input
+          ref={fileInputRef}
+          type='file'
+          accept='image/*'
+          multiple
+          onChange={handleImageSelect}
+          className='hidden'
+        />
 
         <Tooltip>
           <TooltipTrigger
@@ -146,7 +133,9 @@ export function PlaygroundInputTools({
                 <Trash2Icon size={16} />
               </PromptInputButton>
             }
-          />
+          >
+            <p>{t('Clear chat history')}</p>
+          </TooltipTrigger>
           <TooltipContent>
             <p>{t('Clear chat history')}</p>
           </TooltipContent>
