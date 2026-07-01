@@ -23,8 +23,6 @@ import { SectionPageLayout } from '@/components/layout'
 import { getSelf } from '@/lib/api'
 
 import { WalletStatsCard } from './components/wallet-stats-card'
-import { AffiliateRewardsCard } from './components/affiliate-rewards-card'
-import { TransferDialog } from './components/dialogs/transfer-dialog'
 import type { UserWalletData } from './types'
 
 interface WalletProps {
@@ -35,7 +33,6 @@ export function Wallet(props: WalletProps) {
   const { t } = useTranslation()
   const [user, setUser] = useState<UserWalletData | null>(null)
   const [userLoading, setUserLoading] = useState(true)
-  const [transferDialogOpen, setTransferDialogOpen] = useState(false)
 
   const fetchUser = useCallback(async () => {
     try {
@@ -62,35 +59,13 @@ export function Wallet(props: WalletProps) {
   }, [props.initialShowHistory])
 
   return (
-    <>
-      <SectionPageLayout>
-        <SectionPageLayout.Title>{t('Wallet')}</SectionPageLayout.Title>
-        <SectionPageLayout.Content>
-          <div className='mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-5'>
-            <WalletStatsCard user={user} loading={userLoading} />
-            <AffiliateRewardsCard
-              user={user}
-              affiliateLink=""
-              onTransfer={() => setTransferDialogOpen(true)}
-              complianceConfirmed={false}
-              loading={false}
-            />
-          </div>
-        </SectionPageLayout.Content>
-      </SectionPageLayout>
-
-      <TransferDialog
-        open={transferDialogOpen}
-        onOpenChange={setTransferDialogOpen}
-        onConfirm={async (amount: number) => {
-          // Transfer is handled inside the dialog
-          setTransferDialogOpen(false)
-          await fetchUser()
-          return true
-        }}
-        availableQuota={user?.aff_quota ?? 0}
-        transferring={false}
-      />
-    </>
+    <SectionPageLayout>
+      <SectionPageLayout.Title>{t('Wallet')}</SectionPageLayout.Title>
+      <SectionPageLayout.Content>
+        <div className='mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-5'>
+          <WalletStatsCard user={user} loading={userLoading} />
+        </div>
+      </SectionPageLayout.Content>
+    </SectionPageLayout>
   )
 }

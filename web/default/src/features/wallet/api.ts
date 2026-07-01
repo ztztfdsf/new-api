@@ -54,10 +54,15 @@ export function isApiSuccess(response: ApiResponse): boolean {
 
 /**
  * Get topup configuration info
+ * Returns empty data gracefully when the topup endpoint is disabled
  */
 export async function getTopupInfo(): Promise<TopupInfoResponse> {
-  const res = await api.get('/api/user/topup/info')
-  return res.data
+  try {
+    const res = await api.get('/api/user/topup/info')
+    return res.data
+  } catch {
+    return { success: false, message: 'not_available' }
+  }
 }
 
 /**

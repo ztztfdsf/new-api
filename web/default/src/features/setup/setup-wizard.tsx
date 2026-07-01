@@ -191,11 +191,7 @@ export function SetupWizard() {
     if (currentStep === 0) {
       return <RestoreStep
         onRestored={() => {
-          if (setupStatus?.root_init) {
-            setCurrentStep(3)
-          } else {
-            setCurrentStep(1)
-          }
+          setCurrentStep(1)
         }}
       />
     }

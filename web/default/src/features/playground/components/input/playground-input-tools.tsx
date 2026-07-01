@@ -31,6 +31,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
 
 type PlaygroundInputToolsProps = {
   disabled?: boolean
@@ -47,12 +48,11 @@ export function PlaygroundInputTools({
 }: PlaygroundInputToolsProps) {
   const { t } = useTranslation()
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const dragCounterRef = useRef(0)
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-
+  const processFiles = (files: FileList | File[]) => {
     const readers: Promise<string>[] = []
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
@@ -75,9 +75,49 @@ export function PlaygroundInputTools({
         onImageSelected?.(dataUrls)
       }
     })
+  }
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    processFiles(files)
 
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
+    }
+  }
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    dragCounterRef.current += 1
+    if (dragCounterRef.current === 1) {
+      setIsDragging(true)
+    }
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    dragCounterRef.current -= 1
+    if (dragCounterRef.current === 0) {
+      setIsDragging(false)
+    }
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    dragCounterRef.current = 0
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFiles(e.dataTransfer.files)
     }
   }
 
@@ -89,13 +129,22 @@ export function PlaygroundInputTools({
 
   return (
     <>
-      <PromptInputTools className='bg-background/70 border-border/60 rounded-lg border p-1 shadow-xs'>
+      <PromptInputTools
+        className='bg-background/70 border-border/60 rounded-lg border p-1 shadow-xs'
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
         <Tooltip>
           <TooltipTrigger
             render={
               <PromptInputButton
                 aria-label={t('Upload image')}
-                className='text-muted-foreground hover:text-foreground hover:bg-muted/70 font-medium'
+                className={cn(
+                  'text-muted-foreground hover:text-foreground hover:bg-muted/70 font-medium',
+                  isDragging && 'bg-primary/10 text-primary'
+                )}
                 disabled={disabled}
                 variant='ghost'
                 onClick={() => fileInputRef.current?.click()}
@@ -104,7 +153,7 @@ export function PlaygroundInputTools({
               </PromptInputButton>
             }
           >
-            <p>{t('Upload image')}</p>
+            <p>{t('Click to select or drag an image here')}</p>
           </TooltipTrigger>
           <TooltipContent>
             <p>{t('Click to select or drag an image here')}</p>

@@ -65,6 +65,12 @@ const LazyLogStatCards = lazy(() =>
   }))
 )
 
+const LazyDonutChartsSection = lazy(() =>
+  import('./components/models/donut-charts-section').then((m) => ({
+    default: m.DonutChartsSection,
+  }))
+)
+
 const LazyModelCharts = lazy(() =>
   import('./components/models/model-charts').then((m) => ({
     default: m.ModelCharts,
@@ -144,6 +150,23 @@ function PerformanceOverviewFallback() {
           ))}
         </div>
       </div>
+    </div>
+  )
+}
+
+function DonutChartsFallback() {
+  return (
+    <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+      {Array.from({ length: 2 }).map((_, i) => (
+        <div key={i} className='overflow-hidden rounded-lg border'>
+          <div className='border-b px-3 py-2 sm:px-5 sm:py-3'>
+            <Skeleton className='h-5 w-32' />
+          </div>
+          <div className='h-[280px] p-1.5 sm:h-80 sm:p-2'>
+            <Skeleton className='h-full w-full' />
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -334,6 +357,14 @@ export function Dashboard() {
                   </Suspense>
                 </FadeIn>
               )}
+              <FadeIn delay={0.08}>
+                <Suspense fallback={<DonutChartsFallback />}>
+                  <LazyDonutChartsSection
+                    data={modelData}
+                    loading={dataLoading}
+                  />
+                </Suspense>
+              </FadeIn>
               <FadeIn delay={0.1}>
                 <Suspense fallback={<ModelChartsFallback />}>
                   <LazyConsumptionDistributionChart

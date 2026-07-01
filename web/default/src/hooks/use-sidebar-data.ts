@@ -19,20 +19,16 @@ For commercial licensing, please contact support@quantumnous.com
 import {
   Activity,
   Box,
-  CreditCard,
   FileText,
   FlaskConical,
   Key,
   LayoutDashboard,
-  ListTodo,
   MessageSquare,
   Radio,
   ServerCog,
   Settings,
-  Ticket,
-  User,
+  UserCircle,
   Users,
-  Wallet,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -90,13 +86,6 @@ export function useSidebarData(): SidebarData {
             url: '/usage-logs/common',
             icon: FileText,
           },
-          {
-            title: t('Task Logs'),
-            url: '/usage-logs/task',
-            activeUrls: ['/usage-logs/drawing'],
-            configUrls: ['/usage-logs/drawing', '/usage-logs/task'],
-            icon: ListTodo,
-          },
         ],
       },
       {
@@ -104,14 +93,9 @@ export function useSidebarData(): SidebarData {
         title: t('Personal'),
         items: [
           {
-            title: t('Wallet'),
-            url: '/wallet',
-            icon: Wallet,
-          },
-          {
             title: t('Profile'),
             url: '/profile',
-            icon: User,
+            icon: UserCircle,
           },
         ],
       },
@@ -125,24 +109,14 @@ export function useSidebarData(): SidebarData {
             icon: Radio,
           },
           {
-            title: t('Models'),
-            url: '/models/metadata',
-            icon: Box,
-          },
-          {
             title: t('Users'),
             url: '/users',
             icon: Users,
           },
           {
-            title: t('Redemption Codes'),
-            url: '/redemption-codes',
-            icon: Ticket,
-          },
-          {
-            title: t('Subscriptions'),
-            url: '/subscriptions',
-            icon: CreditCard,
+            title: t('Invitation Codes'),
+            url: '/invitation-codes',
+            icon: Key,
           },
           {
             title: t('System Info'),

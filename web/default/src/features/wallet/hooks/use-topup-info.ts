@@ -177,6 +177,8 @@ export function useTopupInfo() {
       if (!response.success || !response.data) {
         // eslint-disable-next-line no-console
         console.error('Failed to fetch topup info:', response.message)
+        setTopupInfo(null)
+        setPresetAmounts([])
         return
       }
 
