@@ -322,7 +322,7 @@ func InitResources() error {
 	common.StartSystemMonitor()
 
 	// 启动自动日志清理
-	service.StartLogAutoCleanup()
+	controller.StartLogAutoCleanup()
 
 	// Initialize i18n
 	err = i18n.Init()
