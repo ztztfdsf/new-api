@@ -74,12 +74,10 @@ const NotificationSettings = ({
       detail: true,
       token: true,
       log: true,
-      midjourney: true,
       task: true,
     },
     personal: {
       enabled: true,
-      topup: true,
       personal: true,
     },
     admin: {
@@ -87,8 +85,6 @@ const NotificationSettings = ({
       channel: true,
       models: true,
       deployment: true,
-      subscription: true,
-      redemption: true,
       user: true,
       setting: true,
     },
@@ -162,17 +158,14 @@ const NotificationSettings = ({
         detail: true,
         token: true,
         log: true,
-        midjourney: true,
         task: true,
       },
-      personal: { enabled: true, topup: true, personal: true },
+      personal: { enabled: true, personal: true },
       admin: {
         enabled: true,
         channel: true,
         models: true,
         deployment: true,
-        subscription: true,
-        redemption: true,
         user: true,
         setting: true,
       },
@@ -278,7 +271,6 @@ const NotificationSettings = ({
       title: t('个人中心区域'),
       description: t('用户个人功能'),
       modules: [
-        { key: 'topup', title: t('钱包管理'), description: t('余额充值管理') },
         {
           key: 'personal',
           title: t('个人设置'),
