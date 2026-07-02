@@ -23,7 +23,7 @@ import { API, showError, showNotice } from '../../helpers';
 import { useTranslation } from 'react-i18next';
 
 import StepNavigation from './components/StepNavigation';
-import DatabaseStep from './components/steps/DatabaseStep';
+import RestoreStep from './components/steps/RestoreStep';
 import AdminStep from './components/steps/AdminStep';
 import UsageModeStep from './components/steps/UsageModeStep';
 import CompleteStep from './components/steps/CompleteStep';
@@ -56,8 +56,8 @@ const SetupWizard = () => {
   // 定义步骤内容
   const steps = [
     {
-      title: t('数据库检查'),
-      description: t('验证数据库连接状态'),
+      title: t('从备份恢复'),
+      description: t('可选，上传备份文件恢复数据'),
     },
     {
       title: t('管理员账号'),
@@ -123,8 +123,8 @@ const SetupWizard = () => {
   // 验证是否可以继续到下一步
   const canProceedToNext = () => {
     switch (currentStep) {
-      case 0: // 数据库检查步骤
-        return true; // 数据库检查总是可以继续
+      case 0: // 从备份恢复步骤
+        return true; // 恢复步骤总是可以跳过
       case 1: // 管理员账号步骤
         if (setupStatus.root_init) {
           return true; // 如果已经初始化，可以继续
@@ -230,7 +230,7 @@ const SetupWizard = () => {
   const getStepContent = (step) => {
     switch (step) {
       case 0:
-        return <DatabaseStep setupStatus={setupStatus} t={t} />;
+        return <RestoreStep setupStatus={setupStatus} t={t} />;
       case 1:
         return (
           <AdminStep

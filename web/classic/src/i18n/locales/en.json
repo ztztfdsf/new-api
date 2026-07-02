@@ -3827,5 +3827,17 @@
     "运营和收费行为产生的法律责任": "operation and charging behavior",
     "，": ", ",
     "、": ", "
-  }
+  },
+  "从备份恢复": "Restore from backup",
+  "可选，上传备份文件恢复数据": "Optional - upload a backup to restore data",
+  "上传之前导出的 JSON 备份文件来恢复数据，或跳过进行全新安装。": "Upload a previously exported JSON backup file to restore data, or skip to start fresh.",
+  "点击选择或将 JSON 备份文件拖放到此处": "Click to select or drag a JSON backup file here",
+  "选择文件": "Select file",
+  "跳过，全新安装": "Skip, fresh install",
+  "恢复中…": "Restoring…",
+  "备份恢复成功！": "Backup restored successfully!",
+  "恢复备份": "Restore backup",
+  "请选择 JSON 备份文件": "Please select a JSON backup file",
+  "请先选择备份文件": "Please select a backup file first",
+  "备份恢复失败": "Backup restore failed"
 }
