@@ -1,5 +1,4 @@
 /*
-Copyright (C) 2023-2026 QuantumNous
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -14,9 +13,8 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-For commercial licensing, please contact support@quantumnous.com
 */
-import { ExternalLinkIcon, RefreshCcwIcon } from 'lucide-react'
+import { RefreshCcwIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -54,47 +52,7 @@ export function UpdateCheckerSection({
   const version = currentVersion || t('Unknown')
 
   const handleCheckUpdates = async () => {
-    setChecking(true)
-    try {
-      const response = await fetch(
-        'https://api.github.com/repos/Calcium-Ion/new-api/releases/latest',
-        {
-          headers: {
-            Accept: 'application/vnd.github+json',
-            'User-Agent': 'new-api-dashboard',
-          },
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error(t('Failed to contact GitHub releases API'))
-      }
-
-      const data = (await response.json()) as ReleaseInfo
-      if (!data?.tag_name) {
-        throw new Error(t('Unexpected release payload'))
-      }
-
-      if (currentVersion && data.tag_name === currentVersion) {
-        toast.success(
-          t('You are running the latest version ({{version}}).', {
-            version: data.tag_name,
-          })
-        )
-        return
-      }
-
-      setRelease(data)
-      setDialogOpen(true)
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : t('Failed to check for updates')
-      toast.error(message)
-    } finally {
-      setChecking(false)
-    }
+    toast.info(t('Update checking is disabled.'))
   }
 
   const goToRelease = () => {

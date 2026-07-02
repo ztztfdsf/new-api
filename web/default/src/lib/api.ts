@@ -1,5 +1,4 @@
 /*
-Copyright (C) 2023-2026 QuantumNous
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -14,7 +13,6 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-For commercial licensing, please contact support@quantumnous.com
 */
 import axios, { type AxiosRequestConfig } from 'axios'
 import { t } from 'i18next'
@@ -149,7 +147,7 @@ export function getCommonHeaders(): Record<string, string> {
 
   const uid = getUserId()
   if (uid) {
-    headers['New-Api-User'] = uid
+    headers['X-User-Id'] = uid
   }
 
   return headers
@@ -164,7 +162,7 @@ api.interceptors.request.use((config) => {
   const uid = getUserId()
   if (uid) {
     // Custom header for user identification
-    ;(config.headers as Record<string, string>)['New-Api-User'] = uid
+    ;(config.headers as Record<string, string>)['X-User-Id'] = uid
   }
   return config
 })
