@@ -34,19 +34,12 @@ const routerMap = {
   home: '/',
   channel: '/console/channel',
   token: '/console/token',
-  redemption: '/console/redemption',
-  topup: '/console/topup',
   user: '/console/user',
-  subscription: '/console/subscription',
   log: '/console/log',
-  midjourney: '/console/midjourney',
   setting: '/console/setting',
   about: '/about',
   detail: '/console',
   pricing: '/pricing',
-  task: '/console/task',
-  models: '/console/models',
-  deployment: '/console/deployment',
   playground: '/console/playground',
   personal: '/console/personal',
 };
@@ -110,19 +103,9 @@ const SiderBar = ({ onNavigate = () => {} }) => {
   const financeItems = useMemo(() => {
     const items = [
       {
-        text: t('钱包管理'),
-        itemKey: 'topup',
-        to: '/topup',
-      },
-      {
         text: t('个人设置'),
         itemKey: 'personal',
         to: '/personal',
-      },
-      {
-        text: t('邀请码'),
-        itemKey: 'invitation',
-        to: '/console/invitation-codes',
       },
       {
         text: t('邀请码'),

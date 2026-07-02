@@ -36,22 +36,15 @@ export const DEFAULT_ADMIN_CONFIG = {
     detail: true,
     token: true,
     log: true,
-    midjourney: true,
-    task: true,
   },
   personal: {
     enabled: true,
-    topup: true,
     personal: true,
   },
   admin: {
     enabled: true,
     channel: true,
-    models: true,
-    deployment: true,
-    redemption: true,
     user: true,
-    subscription: true,
     setting: true,
   },
 };
