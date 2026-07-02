@@ -89,22 +89,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         itemKey: 'log',
         to: '/log',
       },
-      {
-        text: t('绘图日志'),
-        itemKey: 'midjourney',
-        to: '/midjourney',
-        className:
-          localStorage.getItem('enable_drawing') === 'true'
-            ? ''
-            : 'tableHiddle',
-      },
-      {
-        text: t('任务日志'),
-        itemKey: 'task',
-        to: '/task',
-        className:
-          localStorage.getItem('enable_task') === 'true' ? '' : 'tableHiddle',
-      },
+      
     ];
 
     // 根据配置过滤项目
@@ -134,6 +119,16 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         itemKey: 'personal',
         to: '/personal',
       },
+      {
+        text: t('邀请码'),
+        itemKey: 'invitation',
+        to: '/console/invitation-codes',
+      },
+      {
+        text: t('邀请码'),
+        itemKey: 'invitation',
+        to: '/console/invitation-codes',
+      },
     ];
 
     // 根据配置过滤项目
@@ -153,30 +148,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         to: '/channel',
         className: isAdmin() ? '' : 'tableHiddle',
       },
-      {
-        text: t('订阅管理'),
-        itemKey: 'subscription',
-        to: '/subscription',
-        className: isAdmin() ? '' : 'tableHiddle',
-      },
-      {
-        text: t('模型管理'),
-        itemKey: 'models',
-        to: '/console/models',
-        className: isAdmin() ? '' : 'tableHiddle',
-      },
-      {
-        text: t('模型部署'),
-        itemKey: 'deployment',
-        to: '/deployment',
-        className: isAdmin() ? '' : 'tableHiddle',
-      },
-      {
-        text: t('兑换码管理'),
-        itemKey: 'redemption',
-        to: '/redemption',
-        className: isAdmin() ? '' : 'tableHiddle',
-      },
+      
       {
         text: t('用户管理'),
         itemKey: 'user',
