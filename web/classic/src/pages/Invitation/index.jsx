@@ -17,8 +17,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Table, Modal, Form, InputNumber, Input, Tag, Space } from '@douyinfe/semi-ui';
-import { API, showSuccess, showError } from '../../helpers';
+import { Button, Table, Modal, Form, InputNumber, Input, Tag, DatePicker, Toast } from '@douyinfe/semi-ui';
+import { API, showSuccess, showError, copy } from '../../helpers';
 
 const Invitation = () => {
   const { t } = useTranslation();
@@ -29,6 +29,9 @@ const Invitation = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [count, setCount] = useState(1);
   const [note, setNote] = useState('');
+  const [expiresAt, setExpiresAt] = useState(null);
+  const [showResult, setShowResult] = useState(false);
+  const [createdCodes, setCreatedCodes] = useState([]);
 
   const loadCodes = async (p = 1) => {
     setLoading(true);
@@ -54,11 +57,15 @@ const Invitation = () => {
   const handleCreate = async () => {
     if (count <= 0) return;
     try {
-      const res = await API.post('/api/invitation/', { count, note });
+      const expires_at = expiresAt ? Math.floor(expiresAt.getTime() / 1000) : 0;
+      const res = await API.post('/api/invitation/', { count, note, expires_at });
       if (res.data.success) {
         showSuccess(t('生成成功'));
+        setCreatedCodes(res.data.data || []);
         setShowCreate(false);
+        setShowResult(true);
         setNote('');
+        setExpiresAt(null);
         loadCodes();
       } else {
         showError(res.data.message);
@@ -79,6 +86,12 @@ const Invitation = () => {
       }
     } catch (e) {
       showError(t('删除失败'));
+    }
+  };
+
+  const copyText = async (text) => {
+    if (await copy(text)) {
+      showSuccess(t('已复制'));
     }
   };
 
@@ -109,14 +122,12 @@ const Invitation = () => {
       render: (val) => (val ? formatTime(val) : t('永不过期')),
     },
     {
-      title: t('使用人'),
-      dataIndex: 'used_by',
-      render: (val) => val || '-',
-    },
-    {
-      title: t('使用时间'),
-      dataIndex: 'used_at',
-      render: (val) => (val ? formatTime(val) : '-'),
+      title: t('状态'),
+      render: (_, record) => {
+        if (record.used_by) return <Tag color='light-green'>{t('已使用')}</Tag>;
+        if (record.expires_at && Date.now() / 1000 > record.expires_at) return <Tag color='red'>{t('已过期')}</Tag>;
+        return <Tag color='blue'>{t('有效')}</Tag>;
+      },
     },
     {
       title: t('操作'),
@@ -177,9 +188,35 @@ const Invitation = () => {
             onChange={(v) => setNote(v)}
             placeholder={t('备注（可选）')}
             label={t('备注')}
+            style={{ width: '100%', marginBottom: 16 }}
+          />
+          <DatePicker
+            type='dateTime'
+            value={expiresAt}
+            onChange={(date) => setExpiresAt(date)}
+            placeholder={t('过期时间（可选，留空永不过期）')}
+            label={t('过期时间')}
             style={{ width: '100%' }}
           />
         </Form>
+      </Modal>
+
+      <Modal
+        title={t('邀请码已生成')}
+        visible={showResult}
+        onOk={() => setShowResult(false)}
+        onCancel={() => setShowResult(false)}
+        okText={t('确定')}
+        cancelText={t('关闭')}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {createdCodes.map((item, idx) => (
+            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+              <Tag color='blue' size='large'>{item.code}</Tag>
+              <Button size='small' onClick={() => copyText(item.code)}>{t('复制')}</Button>
+            </div>
+          ))}
+        </div>
       </Modal>
     </div>
   );

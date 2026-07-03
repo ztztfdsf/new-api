@@ -180,10 +180,6 @@ func Register(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgUserRegisterDisabled)
 		return
 	}
-	if !common.PasswordRegisterEnabled {
-		common.ApiErrorI18n(c, i18n.MsgUserPasswordRegisterDisabled)
-		return
-	}
 	var req struct {
 		Username         string `json:"username"`
 		Password         string `json:"password"`
@@ -225,6 +221,11 @@ func Register(c *gin.Context) {
 	// Validate invitation code (required)
 	valid, msgKey := model.ValidateInvitationCode(req.InvitationCode)
 	if !valid {
+		// When password registration is disabled, registration is allowed with a valid invitation code
+		if !common.PasswordRegisterEnabled {
+			common.ApiErrorI18n(c, i18n.MsgUserPasswordRegisterDisabled)
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": i18n.T(c, msgKey),
