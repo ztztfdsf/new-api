@@ -91,6 +91,7 @@ export default function SettingsSidebarModulesUser() {
       defaultConfig.personal = {
         enabled: true,
         personal: isSidebarModuleAllowed('personal', 'personal'),
+        invitation: isSidebarModuleAllowed('personal', 'invitation'),
       };
     }
 
@@ -310,6 +311,11 @@ export default function SettingsSidebarModulesUser() {
           key: 'personal',
           title: t('个人设置'),
           description: t('个人信息设置'),
+        },
+        {
+          key: 'invitation',
+          title: t('邀请码'),
+          description: t('生成和管理注册邀请码'),
         },
       ],
     },

@@ -39,6 +39,7 @@ export const DEFAULT_ADMIN_CONFIG = {
   personal: {
     enabled: true,
     personal: true,
+    invitation: true,
   },
   admin: {
     enabled: true,

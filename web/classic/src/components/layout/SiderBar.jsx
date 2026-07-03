@@ -40,6 +40,7 @@ const routerMap = {
   detail: '/console',
   playground: '/console/playground',
   personal: '/console/personal',
+  invitation: '/console/invitation-codes',
 };
 
 const SiderBar = ({ onNavigate = () => {} }) => {
@@ -99,6 +100,11 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('个人设置'),
         itemKey: 'personal',
         to: '/personal',
+      },
+      {
+        text: t('邀请码'),
+        itemKey: 'invitation',
+        to: '/console/invitation-codes',
       },
     ];
 

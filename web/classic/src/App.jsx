@@ -36,6 +36,8 @@ import Token from './pages/Token';
 
 import Log from './pages/Log';
 
+import Invitation from './pages/Invitation';
+
 import Pricing from './pages/Pricing';
 
 
@@ -220,6 +222,14 @@ function App() {
             <PrivateRoute>
               <Log />
             </PrivateRoute>
+          }
+        />
+        <Route
+          path='/console/invitation-codes'
+          element={
+            <AdminRoute>
+              <Invitation />
+            </AdminRoute>
           }
         />
         <Route

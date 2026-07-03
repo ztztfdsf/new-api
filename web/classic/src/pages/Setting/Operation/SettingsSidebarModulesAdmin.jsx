@@ -53,6 +53,7 @@ export default function SettingsSidebarModulesAdmin(props) {
     personal: {
       enabled: true,
       personal: true,
+      invitation: true,
     },
     admin: {
       enabled: true,
@@ -95,7 +96,7 @@ export default function SettingsSidebarModulesAdmin(props) {
     const defaultModules = {
       chat: { enabled: true, playground: true },
       console: { enabled: true, detail: true, token: true, log: true },
-      personal: { enabled: true, personal: true },
+      personal: { enabled: true, personal: true, invitation: true },
       admin: { enabled: true, channel: true, user: true, setting: true },
     };
     setSidebarModulesAdmin(defaultModules);
@@ -148,7 +149,7 @@ export default function SettingsSidebarModulesAdmin(props) {
         const defaultModules = {
           chat: { enabled: true, playground: true },
           console: { enabled: true, detail: true, token: true, log: true },
-          personal: { enabled: true, personal: true },
+          personal: { enabled: true, personal: true, invitation: true },
           admin: { enabled: true, channel: true, user: true, setting: true },
         };
         setSidebarModulesAdmin(defaultModules);
@@ -185,6 +186,11 @@ export default function SettingsSidebarModulesAdmin(props) {
           key: 'personal',
           title: t('个人设置'),
           description: t('个人信息设置'),
+        },
+        {
+          key: 'invitation',
+          title: t('邀请码'),
+          description: t('生成和管理注册邀请码'),
         },
       ],
     },
