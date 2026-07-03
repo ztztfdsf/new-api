@@ -40,13 +40,6 @@ func SetTheme(t string) {
 func ThemeAwarePath(suffix string) string {
 	return suffix
 }
-	case strings.HasPrefix(suffix, "/console/log"):
-		return strings.Replace(suffix, "/console/log", "/usage-logs", 1)
-	case strings.HasPrefix(suffix, "/console/personal"):
-		return strings.Replace(suffix, "/console/personal", "/profile", 1)
-	}
-	return suffix
-}
 
 // var ChatLink = ""
 // var ChatLink2 = ""
