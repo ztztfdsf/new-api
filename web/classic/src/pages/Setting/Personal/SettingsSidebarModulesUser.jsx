@@ -91,7 +91,6 @@ export default function SettingsSidebarModulesUser() {
       defaultConfig.personal = {
         enabled: true,
         personal: isSidebarModuleAllowed('personal', 'personal'),
-        invitation: isSidebarModuleAllowed('personal', 'invitation'),
       };
     }
 
@@ -102,6 +101,7 @@ export default function SettingsSidebarModulesUser() {
         channel: isSidebarModuleAllowed('admin', 'channel'),
         user: isSidebarModuleAllowed('admin', 'user'),
         setting: isSidebarModuleAllowed('admin', 'setting'),
+        invitation: isSidebarModuleAllowed('admin', 'invitation'),
       };
     }
 
@@ -312,11 +312,6 @@ export default function SettingsSidebarModulesUser() {
           title: t('个人设置'),
           description: t('个人信息设置'),
         },
-        {
-          key: 'invitation',
-          title: t('邀请码'),
-          description: t('生成和管理注册邀请码'),
-        },
       ],
     },
     {
@@ -326,6 +321,7 @@ export default function SettingsSidebarModulesUser() {
       modules: [
         { key: 'channel', title: t('渠道管理'), description: t('API渠道配置') },
         { key: 'user', title: t('用户管理'), description: t('用户账户管理') },
+        { key: 'invitation', title: t('邀请码'), description: t('生成和管理注册邀请码') },
         {
           key: 'setting',
           title: t('系统设置'),

@@ -39,13 +39,13 @@ export const DEFAULT_ADMIN_CONFIG = {
   personal: {
     enabled: true,
     personal: true,
-    invitation: true,
   },
   admin: {
     enabled: true,
     channel: true,
     user: true,
     setting: true,
+    invitation: true,
   },
 };
 

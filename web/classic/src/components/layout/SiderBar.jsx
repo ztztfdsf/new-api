@@ -101,11 +101,6 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         itemKey: 'personal',
         to: '/personal',
       },
-      {
-        text: t('邀请码'),
-        itemKey: 'invitation',
-        to: '/console/invitation-codes',
-      },
     ];
 
     // 根据配置过滤项目
@@ -131,6 +126,12 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         itemKey: 'user',
         to: '/user',
         className: isAdmin() ? '' : 'tableHiddle',
+      },
+      {
+        text: t('邀请码'),
+        itemKey: 'invitation',
+        to: '/console/invitation-codes',
+        className: isRoot() ? '' : 'tableHiddle',
       },
       {
         text: t('系统设置'),
