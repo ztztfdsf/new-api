@@ -69,10 +69,6 @@ func ListInvitationCodes(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgDatabaseError)
 		return
 	}
-	for i := range codes {
-		codes[i].Note = maskCode(codes[i].Code, codes[i].Note)
-		codes[i].Code = maskCode(codes[i].Code, "")
-	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data": gin.H{
@@ -104,14 +100,4 @@ func DeleteInvitationCode(c *gin.Context) {
 		"success": true,
 		"message": i18n.T(c, i18n.MsgInvitationDeletedSuccess),
 	})
-}
-
-func maskCode(code, note string) string {
-	if code == "" {
-		return code
-	}
-	if len(code) <= 4 {
-		return code[:1] + "****"
-	}
-	return code[:2] + "****" + code[len(code)-2:]
 }

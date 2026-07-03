@@ -104,7 +104,14 @@ const Invitation = () => {
     {
       title: t('邀请码'),
       dataIndex: 'code',
-      render: (text) => <Tag color='blue'>{text}</Tag>,
+      render: (text) => (
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Tag color='blue'>{text}</Tag>
+          <Button size='small' theme='borderless' type='primary' onClick={() => copyText(text)}>
+            {t('复制')}
+          </Button>
+        </span>
+      ),
     },
     {
       title: t('备注'),
