@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	//"os"
 	//"strconv"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
