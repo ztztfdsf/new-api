@@ -36,8 +36,6 @@ import Token from './pages/Token';
 
 
 import Log from './pages/Log';
-import Chat from './pages/Chat';
-import Chat2Link from './pages/Chat2Link';
 
 import Pricing from './pages/Pricing';
 
@@ -303,26 +301,7 @@ function App() {
             </Suspense>
           }
         />
-        <Route
-          path='/console/chat/:id?'
-          element={
-            <Suspense fallback={<Loading></Loading>} key={location.pathname}>
-              <Chat />
-            </Suspense>
-          }
-        />
-        {/* 方便使用chat2link直接跳转聊天... */}
-        <Route
-          path='/chat2link'
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<Loading></Loading>} key={location.pathname}>
-                <Chat2Link />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route path='*' element={<NotFound />} />
+                <Route path='*' element={<NotFound />} />
       </Routes>
     </SetupCheck>
   );

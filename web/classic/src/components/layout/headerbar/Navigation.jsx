@@ -26,7 +26,6 @@ const Navigation = ({
   isMobile,
   isLoading,
   userState,
-  pricingRequireAuth,
 }) => {
   const renderNavLinks = () => {
     const baseClasses =
@@ -39,25 +38,8 @@ const Navigation = ({
     return mainNavLinks.map((link) => {
       const linkContent = <span>{link.text}</span>;
 
-      if (link.isExternal) {
-        return (
-          <a
-            key={link.itemKey}
-            href={link.externalLink}
-            target='_blank'
-            rel='noopener noreferrer'
-            className={commonLinkClasses}
-          >
-            {linkContent}
-          </a>
-        );
-      }
-
       let targetPath = link.to;
       if (link.itemKey === 'console' && !userState.user) {
-        targetPath = '/login';
-      }
-      if (link.itemKey === 'pricing' && pricingRequireAuth && !userState.user) {
         targetPath = '/login';
       }
 

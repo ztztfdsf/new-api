@@ -40,12 +40,10 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     logo,
     isNewYear,
     isSelfUseMode,
-    docsLink,
     isDemoSiteMode,
     isConsoleRoute,
     theme,
     headerNavModules,
-    pricingRequireAuth,
     logout,
     handleLanguageChange,
     handleThemeToggle,
@@ -104,7 +102,6 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
             isMobile={isMobile}
             isLoading={isLoading}
             userState={userState}
-            pricingRequireAuth={pricingRequireAuth}
           />
 
           <ActionButtons

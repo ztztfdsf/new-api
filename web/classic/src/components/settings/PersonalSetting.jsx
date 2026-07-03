@@ -39,10 +39,7 @@ import { useTranslation } from 'react-i18next';
 import UserInfoHeader from './personal/components/UserInfoHeader';
 import AccountManagement from './personal/cards/AccountManagement';
 import NotificationSettings from './personal/cards/NotificationSettings';
-import PreferencesSettings from './personal/cards/PreferencesSettings';
 import CheckinCalendar from './personal/cards/CheckinCalendar';
-import EmailBindModal from './personal/modals/EmailBindModal';
-import WeChatBindModal from './personal/modals/WeChatBindModal';
 import AccountDeleteModal from './personal/modals/AccountDeleteModal';
 import ChangePasswordModal from './personal/modals/ChangePasswordModal';
 import SecureVerificationModal from '../common/modals/SecureVerificationModal';
@@ -54,9 +51,6 @@ const PersonalSetting = () => {
   const { t } = useTranslation();
 
   const [inputs, setInputs] = useState({
-    wechat_verification_code: '',
-    email_verification_code: '',
-    email: '',
     self_account_deletion_confirmation: '',
     original_password: '',
     set_new_password: '',
@@ -64,8 +58,6 @@ const PersonalSetting = () => {
   });
   const [status, setStatus] = useState({});
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [showWeChatBindModal, setShowWeChatBindModal] = useState(false);
-  const [showEmailBindModal, setShowEmailBindModal] = useState(false);
   const [showAccountDeleteModal, setShowAccountDeleteModal] = useState(false);
   const [turnstileEnabled, setTurnstileEnabled] = useState(false);
   const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
@@ -412,10 +404,6 @@ const PersonalSetting = () => {
   };
 
   const changePassword = async () => {
-    // if (inputs.original_password === '') {
-    //   showError(t('请输入原密码！'));
-    //   return;
-    // }
     if (inputs.set_new_password === '') {
       showError(t('请输入新密码！'));
       return;
@@ -435,55 +423,10 @@ const PersonalSetting = () => {
     const { success, message } = res.data;
     if (success) {
       showSuccess(t('密码修改成功！'));
-      setShowWeChatBindModal(false);
     } else {
       showError(message);
     }
     setShowChangePasswordModal(false);
-  };
-
-  const sendVerificationCode = async () => {
-    if (inputs.email === '') {
-      showError(t('请输入邮箱！'));
-      return;
-    }
-    setDisableButton(true);
-    if (turnstileEnabled && turnstileToken === '') {
-      showInfo(t('请稍后几秒重试，Turnstile 正在检查用户环境！'));
-      return;
-    }
-    setLoading(true);
-    const res = await API.get(
-      `/api/verification?email=${inputs.email}&turnstile=${turnstileToken}`,
-    );
-    const { success, message } = res.data;
-    if (success) {
-      showSuccess(t('验证码发送成功，请检查邮箱！'));
-    } else {
-      showError(message);
-    }
-    setLoading(false);
-  };
-
-  const bindEmail = async () => {
-    if (inputs.email_verification_code === '') {
-      showError(t('请输入邮箱验证码！'));
-      return;
-    }
-    setLoading(true);
-    const res = await API.post('/api/oauth/email/bind', {
-      email: inputs.email,
-      code: inputs.email_verification_code,
-    });
-    const { success, message } = res.data;
-    if (success) {
-      showSuccess(t('邮箱账户绑定成功！'));
-      setShowEmailBindModal(false);
-      userState.user.email = inputs.email;
-    } else {
-      showError(message);
-    }
-    setLoading(false);
   };
 
   const copyText = async (text) => {
@@ -560,7 +503,7 @@ const PersonalSetting = () => {
             </div>
           )}
 
-          {/* 账户管理和其他设置 */}
+          {/* 账户管理 */}
           <div className='grid grid-cols-1 xl:grid-cols-2 items-start gap-4 md:gap-6 mt-4 md:mt-6'>
             {/* 左侧：账户管理设置 */}
             <div className='flex flex-col gap-4 md:gap-6'>
@@ -569,8 +512,6 @@ const PersonalSetting = () => {
                 userState={userState}
                 status={status}
                 systemToken={systemToken}
-                setShowEmailBindModal={setShowEmailBindModal}
-                setShowWeChatBindModal={setShowWeChatBindModal}
                 generateAccessToken={generateAccessToken}
                 handleSystemTokenClick={handleSystemTokenClick}
                 setShowChangePasswordModal={setShowChangePasswordModal}
@@ -582,12 +523,9 @@ const PersonalSetting = () => {
                 onPasskeyRegister={handleRegisterPasskey}
                 onPasskeyDelete={handleRemovePasskey}
               />
-
-              {/* 偏好设置（语言等） */}
-              <PreferencesSettings t={t} />
             </div>
 
-            {/* 右侧：其他设置 */}
+            {/* 右侧：通知设置 */}
             <NotificationSettings
               t={t}
               notificationSettings={notificationSettings}
@@ -599,32 +537,6 @@ const PersonalSetting = () => {
       </div>
 
       {/* 模态框组件 */}
-      <EmailBindModal
-        t={t}
-        showEmailBindModal={showEmailBindModal}
-        setShowEmailBindModal={setShowEmailBindModal}
-        inputs={inputs}
-        handleInputChange={handleInputChange}
-        sendVerificationCode={sendVerificationCode}
-        bindEmail={bindEmail}
-        disableButton={disableButton}
-        loading={loading}
-        countdown={countdown}
-        turnstileEnabled={turnstileEnabled}
-        turnstileSiteKey={turnstileSiteKey}
-        setTurnstileToken={setTurnstileToken}
-      />
-
-      <WeChatBindModal
-        t={t}
-        showWeChatBindModal={showWeChatBindModal}
-        setShowWeChatBindModal={setShowWeChatBindModal}
-        inputs={inputs}
-        handleInputChange={handleInputChange}
-        bindWeChat={bindWeChat}
-        status={status}
-      />
-
       <AccountDeleteModal
         t={t}
         showAccountDeleteModal={showAccountDeleteModal}

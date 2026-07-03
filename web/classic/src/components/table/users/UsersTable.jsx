@@ -242,14 +242,6 @@ const UsersTable = (usersData) => {
         user={modalUser}
         t={t}
       />
-
-      <UserSubscriptionsModal
-        visible={showUserSubscriptionsModal}
-        onCancel={() => setShowUserSubscriptionsModal(false)}
-        user={modalUser}
-        t={t}
-        onSuccess={() => refresh?.()}
-      />
     </>
   );
 };

@@ -231,13 +231,11 @@ export const useHeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     logo,
     isNewYear,
     isSelfUseMode,
-    docsLink,
     isDemoSiteMode,
     isConsoleRoute,
     theme,
     drawerOpen,
     headerNavModules,
-    pricingRequireAuth,
 
     // Actions
     logout,
