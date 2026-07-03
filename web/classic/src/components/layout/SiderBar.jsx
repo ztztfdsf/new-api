@@ -37,9 +37,7 @@ const routerMap = {
   user: '/console/user',
   log: '/console/log',
   setting: '/console/setting',
-  about: '/about',
   detail: '/console',
-  pricing: '/pricing',
   playground: '/console/playground',
   personal: '/console/personal',
 };
@@ -101,11 +99,6 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('个人设置'),
         itemKey: 'personal',
         to: '/personal',
-      },
-      {
-        text: t('邀请码'),
-        itemKey: 'invitation',
-        to: '/console/invitation-codes',
       },
     ];
 

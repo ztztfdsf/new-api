@@ -40,6 +40,10 @@ export default function SettingsSidebarModulesAdmin(props) {
 
   // 左侧边栏模块管理状态（管理员全局控制）
   const [sidebarModulesAdmin, setSidebarModulesAdmin] = useState({
+    chat: {
+      enabled: true,
+      playground: true,
+    },
     console: {
       enabled: true,
       detail: true,
@@ -89,22 +93,10 @@ export default function SettingsSidebarModulesAdmin(props) {
   // 重置为默认配置
   function resetSidebarModules() {
     const defaultModules = {
-      console: {
-        enabled: true,
-        detail: true,
-        token: true,
-        log: true,
-      },
-      personal: {
-        enabled: true,
-        personal: true,
-      },
-      admin: {
-        enabled: true,
-        channel: true,
-        user: true,
-        setting: true,
-      },
+      chat: { enabled: true, playground: true },
+      console: { enabled: true, detail: true, token: true, log: true },
+      personal: { enabled: true, personal: true },
+      admin: { enabled: true, channel: true, user: true, setting: true },
     };
     setSidebarModulesAdmin(defaultModules);
     showSuccess(t('已重置为默认配置'));
@@ -154,6 +146,7 @@ export default function SettingsSidebarModulesAdmin(props) {
       } catch (error) {
         // 使用默认配置
         const defaultModules = {
+          chat: { enabled: true, playground: true },
           console: { enabled: true, detail: true, token: true, log: true },
           personal: { enabled: true, personal: true },
           admin: { enabled: true, channel: true, user: true, setting: true },
@@ -165,6 +158,14 @@ export default function SettingsSidebarModulesAdmin(props) {
 
   // 区域配置数据
   const sectionConfigs = [
+    {
+      key: 'chat',
+      title: t('操练场'),
+      description: t('AI模型测试环境'),
+      modules: [
+        { key: 'playground', title: t('操练场'), description: t('AI模型测试环境') },
+      ],
+    },
     {
       key: 'console',
       title: t('控制台区域'),

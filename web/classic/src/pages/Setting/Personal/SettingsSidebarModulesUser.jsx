@@ -68,6 +68,14 @@ export default function SettingsSidebarModulesUser() {
   const generateDefaultConfig = () => {
     const defaultConfig = {};
 
+    // 操练场
+    if (isSidebarSectionAllowed('chat')) {
+      defaultConfig.chat = {
+        enabled: true,
+        playground: isSidebarModuleAllowed('chat', 'playground'),
+      };
+    }
+
     // 控制台区域 - 所有用户都可以访问
     if (isSidebarSectionAllowed('console')) {
       defaultConfig.console = {
@@ -275,6 +283,14 @@ export default function SettingsSidebarModulesUser() {
 
   // 区域配置数据（根据后端权限过滤）
   const sectionConfigs = [
+    {
+      key: 'chat',
+      title: t('操练场'),
+      description: t('AI模型测试环境'),
+      modules: [
+        { key: 'playground', title: t('操练场'), description: t('AI模型测试环境') },
+      ],
+    },
     {
       key: 'console',
       title: t('控制台区域'),
