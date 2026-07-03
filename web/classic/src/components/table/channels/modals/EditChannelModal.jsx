@@ -406,7 +406,7 @@ const EditChannelModal = (props) => {
     if (!ionetMetadata?.deployment_id) {
       return;
     }
-    const targetUrl = `/console/deployment?deployment_id=${ionetMetadata.deployment_id}`;
+    
     window.open(targetUrl, '_blank', 'noopener');
   };
   const [verifyLoading, setVerifyLoading] = useState(false);
