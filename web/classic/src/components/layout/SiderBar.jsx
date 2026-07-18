@@ -144,12 +144,28 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         itemKey: 'export',
         className: isRoot() ? '' : 'tableHiddle',
         onClick: () => {
-          const a = document.createElement('a');
-          a.href = '/api/performance/backup/export';
-          a.download = 'backup.json';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          fetch('/api/performance/backup/export', {
+            credentials: 'same-origin',
+            headers: {
+              'New-API-User': user.id || '',
+            },
+          })
+            .then((res) => {
+              if (!res.ok) throw new Error('导出失败');
+              return res.blob();
+            })
+            .then((blob) => {
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'backup.json';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            })
+            .catch(() => {});
         },
       },
     ];
