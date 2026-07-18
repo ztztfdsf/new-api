@@ -44,8 +44,9 @@ export const DEFAULT_ADMIN_CONFIG = {
     enabled: true,
     channel: true,
     user: true,
-    setting: true,
     invitation: true,
+    setting: true,
+    export: true,
   },
 };
 

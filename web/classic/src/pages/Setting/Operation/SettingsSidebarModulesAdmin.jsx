@@ -53,14 +53,14 @@ export default function SettingsSidebarModulesAdmin(props) {
     personal: {
       enabled: true,
       personal: true,
-      invitation: true,
     },
     admin: {
       enabled: true,
       channel: true,
       user: true,
-      setting: true,
       invitation: true,
+      setting: true,
+      export: true,
     },
   });
 
@@ -98,7 +98,7 @@ export default function SettingsSidebarModulesAdmin(props) {
       chat: { enabled: true, playground: true },
       console: { enabled: true, detail: true, token: true, log: true },
       personal: { enabled: true, personal: true },
-      admin: { enabled: true, channel: true, user: true, setting: true, invitation: true },
+      admin: { enabled: true, channel: true, user: true, invitation: true, setting: true, export: true },
     };
     setSidebarModulesAdmin(defaultModules);
     showSuccess(t('已重置为默认配置'));
@@ -151,7 +151,7 @@ export default function SettingsSidebarModulesAdmin(props) {
           chat: { enabled: true, playground: true },
           console: { enabled: true, detail: true, token: true, log: true },
           personal: { enabled: true, personal: true },
-          admin: { enabled: true, channel: true, user: true, setting: true, invitation: true },
+          admin: { enabled: true, channel: true, user: true, invitation: true, setting: true, export: true },
         };
         setSidebarModulesAdmin(defaultModules);
       }
@@ -198,6 +198,7 @@ export default function SettingsSidebarModulesAdmin(props) {
         { key: 'channel', title: t('渠道管理'), description: t('API渠道配置') },
         { key: 'user', title: t('用户管理'), description: t('用户账户管理') },
         { key: 'invitation', title: t('邀请码'), description: t('生成和管理注册邀请码') },
+        { key: 'export', title: t('导出备份'), description: t('导出系统配置备份') },
         {
           key: 'setting',
           title: t('系统设置'),
