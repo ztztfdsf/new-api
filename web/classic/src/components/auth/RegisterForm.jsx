@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   API,
   getLogo,
@@ -81,6 +81,16 @@ const RegisterForm = () => {
     verification_code: '',
     wechat_verification_code: '',
   });
+  const [searchParams] = useSearchParams();
+  const invitationCode = searchParams.get('code') || '';
+
+  // 没有邀请码则跳转登录
+  useEffect(() => {
+    if (!invitationCode) {
+      navigate('/login');
+    }
+  }, []);
+
   const { username, password, password2 } = inputs;
   const [userState, userDispatch] = useContext(UserContext);
   const [statusState] = useContext(StatusContext);
@@ -235,6 +245,7 @@ const RegisterForm = () => {
           affCode = localStorage.getItem('aff');
         }
         inputs.aff_code = affCode;
+        inputs.invitation_code = invitationCode;
         const res = await API.post(
           `/api/user/register?turnstile=${turnstileToken}`,
           inputs,
@@ -572,6 +583,9 @@ const RegisterForm = () => {
               </Title>
             </div>
             <div className='px-2 py-8'>
+              <div className='text-center mb-4 text-sm text-red-500'>
+                🤬 {t('请使用真实网名')}
+              </div>
               <Form className='space-y-3'>
                 <Form.Input
                   field='username'

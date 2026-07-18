@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Table, Modal, Form, InputNumber, Input, Tag, DatePicker, Toast } from '@douyinfe/semi-ui';
+import { Button, Table, Modal, Form, InputNumber, Input, Tag, DatePicker } from '@douyinfe/semi-ui';
 import { API, showSuccess, showError, copy } from '../../helpers';
 
 const Invitation = () => {
@@ -32,6 +32,8 @@ const Invitation = () => {
   const [expiresAt, setExpiresAt] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [createdCodes, setCreatedCodes] = useState([]);
+
+  const serverAddr = window.location.origin;
 
   const loadCodes = async (p = 1) => {
     setLoading(true);
@@ -100,18 +102,23 @@ const Invitation = () => {
     return new Date(ts * 1000).toLocaleString();
   };
 
+  const buildLink = (code) => `${serverAddr}/register?code=${code}`;
+
   const columns = [
     {
-      title: t('邀请码'),
-      dataIndex: 'code',
-      render: (text) => (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Tag color='blue'>{text}</Tag>
-          <Button size='small' theme='borderless' type='primary' onClick={() => copyText(text)}>
-            {t('复制')}
-          </Button>
-        </span>
-      ),
+      title: t('邀请链接'),
+      width: 400,
+      render: (_, record) => {
+        const link = buildLink(record.code);
+        return (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Tag color='blue' style={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis' }}>{link}</Tag>
+            <Button size='small' theme='borderless' type='primary' onClick={() => copyText(link)}>
+              {t('复制链接')}
+            </Button>
+          </span>
+        );
+      },
     },
     {
       title: t('备注'),
@@ -154,9 +161,9 @@ const Invitation = () => {
   return (
     <div className='mt-[60px] px-2'>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h3 style={{ margin: 0 }}>{t('邀请码管理')}</h3>
+        <h3 style={{ margin: 0 }}>{t('邀请链接管理')}</h3>
         <Button type='primary' onClick={() => setShowCreate(true)}>
-          {t('生成邀请码')}
+          {t('生成邀请链接')}
         </Button>
       </div>
 
@@ -174,7 +181,7 @@ const Invitation = () => {
       />
 
       <Modal
-        title={t('生成邀请码')}
+        title={t('生成邀请链接')}
         visible={showCreate}
         onOk={handleCreate}
         onCancel={() => setShowCreate(false)}
@@ -209,7 +216,7 @@ const Invitation = () => {
       </Modal>
 
       <Modal
-        title={t('邀请码已生成')}
+        title={t('邀请链接已生成')}
         visible={showResult}
         onOk={() => setShowResult(false)}
         onCancel={() => setShowResult(false)}
@@ -217,12 +224,15 @@ const Invitation = () => {
         cancelText={t('关闭')}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {createdCodes.map((item, idx) => (
-            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
-              <Tag color='blue' size='large'>{item.code}</Tag>
-              <Button size='small' onClick={() => copyText(item.code)}>{t('复制')}</Button>
-            </div>
-          ))}
+          {createdCodes.map((item, idx) => {
+            const link = buildLink(item.code);
+            return (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+                <Tag color='blue' size='large' style={{ maxWidth: 350, overflow: 'hidden', textOverflow: 'ellipsis' }}>{link}</Tag>
+                <Button size='small' onClick={() => copyText(link)}>{t('复制链接')}</Button>
+              </div>
+            );
+          })}
         </div>
       </Modal>
     </div>
