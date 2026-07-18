@@ -118,18 +118,18 @@ func RestoreBackup(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "读取文件失败"})
 		return
 	}
-	var req BackupRestoreRequest
+	var req BackupData
 	if err := common.Unmarshal(body, &req); err != nil {
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "备份文件格式错误"})
 		return
 	}
-	if req.Data.Version != 1 {
+	if req.Version != 1 {
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "不支持的备份版本"})
 		return
 	}
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Minute)
 	defer cancel()
-	if err := restoreTables(ctx, req.Data.Tables); err != nil {
+	if err := restoreTables(ctx, req.Tables); err != nil {
 		common.SysLog(fmt.Sprintf("backup restore failed: %v", err))
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "恢复失败: " + err.Error()})
 		return
