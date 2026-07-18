@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -144,18 +145,26 @@ func restoreTables(ctx context.Context, tables map[string][]byte) error {
 		if !ok || len(bytes.TrimSpace(raw)) == 0 {
 			continue
 		}
-		var items []map[string]any
-		if err := common.Unmarshal(raw, &items); err != nil || len(items) == 0 {
+		// Create a slice of the concrete model type using reflection
+		sliceType := reflect.SliceOf(reflect.TypeOf(entry.Model).Elem())
+		slice := reflect.New(sliceType).Interface()
+		if err := common.Unmarshal(raw, slice); err != nil {
 			common.SysLog(fmt.Sprintf("backup restore: skip table %s, %v", name, err))
 			continue
 		}
+		// Get the underlying slice value
+		sliceVal := reflect.ValueOf(slice).Elem()
+		if sliceVal.Len() == 0 {
+			continue
+		}
+		// Insert in batches
 		batchSize := 500
-		for i := 0; i < len(items); i += batchSize {
+		for i := 0; i < sliceVal.Len(); i += batchSize {
 			end := i + batchSize
-			if end > len(items) {
-				end = len(items)
+			if end > sliceVal.Len() {
+				end = sliceVal.Len()
 			}
-			batch := items[i:end]
+			batch := sliceVal.Slice(i, end).Interface()
 			if err := model.DB.WithContext(ctx).Model(entry.Model).CreateInBatches(batch, batchSize).Error; err != nil {
 				return fmt.Errorf("table %s batch insert failed at offset %d: %w", name, i, err)
 			}
