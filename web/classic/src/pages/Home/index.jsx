@@ -213,7 +213,7 @@ const Home = () => {
 
                 {/* 操作按钮 */}
                 <div className='flex flex-row gap-4 justify-center items-center'>
-                  <Link to='/console'>
+                  <Link to='/login'>
                     <Button
                       theme='solid'
                       type='primary'
@@ -221,7 +221,7 @@ const Home = () => {
                       className='!rounded-3xl px-8 py-2'
                       icon={<IconPlay />}
                     >
-                      {t('获取密钥')}
+                      {t('登录')}
                     </Button>
                   </Link>
                   {isDemoSiteMode && statusState?.status?.version ? (
