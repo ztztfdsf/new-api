@@ -15,7 +15,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Banner, Button, Toast } from '@douyinfe/semi-ui';
 import { IconUpload, IconFile } from '@douyinfe/semi-icons';
 import { API } from '../../../../helpers';
@@ -27,8 +27,10 @@ import { API } from '../../../../helpers';
 const RestoreStep = ({ setupStatus, next, renderNavigationButtons, t }) => {
   const [file, setFile] = useState(null);
   const [restoring, setRestoring] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const handleFileChange = (e) => {
+  const handleFileSelect = (e) => {
     const selected = e.target.files?.[0];
     if (selected) {
       if (!selected.name.endsWith('.json')) {
@@ -36,6 +38,32 @@ const RestoreStep = ({ setupStatus, next, renderNavigationButtons, t }) => {
         return;
       }
       setFile(selected);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(false);
+    const dropped = e.dataTransfer?.files?.[0];
+    if (dropped) {
+      if (!dropped.name.endsWith('.json')) {
+        Toast.error(t('请选择 JSON 备份文件'));
+        return;
+      }
+      setFile(dropped);
     }
   };
 
@@ -56,9 +84,7 @@ const RestoreStep = ({ setupStatus, next, renderNavigationButtons, t }) => {
       if (success) {
         Toast.success(t('备份恢复成功！'));
         setFile(null);
-        // 重置文件输入
-        const input = document.getElementById('backup-file-input');
-        if (input) input.value = '';
+        if (fileInputRef.current) fileInputRef.current.value = '';
       } else {
         Toast.error(message || t('恢复失败'));
       }
@@ -79,28 +105,35 @@ const RestoreStep = ({ setupStatus, next, renderNavigationButtons, t }) => {
         <p>{t('上传之前导出的 JSON 备份文件来恢复数据，或跳过进行全新安装。')}</p>
       </div>
 
-      <div className='border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center'>
+      <div
+        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${dragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => fileInputRef.current?.click()}
+      >
         <IconUpload className='text-gray-400 mb-3' size='extra-large' />
         <p className='text-sm text-gray-500 dark:text-gray-400 mb-3'>
           {file ? file.name : t('点击选择或将 JSON 备份文件拖放到此处')}
         </p>
         <input
+          ref={fileInputRef}
           type='file'
           accept='.json'
-          onChange={handleFileChange}
+          onChange={handleFileSelect}
           className='hidden'
-          id='backup-file-input'
         />
-        <label htmlFor='backup-file-input'>
-          <Button
-            theme='solid'
-            type='primary'
-            size='small'
-            style={{ cursor: 'pointer' }}
-          >
-            {t('选择文件')}
-          </Button>
-        </label>
+        <Button
+          theme='solid'
+          type='primary'
+          size='small'
+          onClick={(e) => {
+            e.stopPropagation();
+            fileInputRef.current?.click();
+          }}
+        >
+          {t('选择文件')}
+        </Button>
       </div>
 
       {file && (
