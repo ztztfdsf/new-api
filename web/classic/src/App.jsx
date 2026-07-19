@@ -141,9 +141,7 @@ function App() {
           path='/register'
           element={
             <Suspense fallback={<Loading></Loading>} key={location.pathname}>
-              <AuthRedirect>
-                <RegisterForm />
-              </AuthRedirect>
+              <RegisterForm />
             </Suspense>
           }
         />
