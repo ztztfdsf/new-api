@@ -3,6 +3,7 @@ package controller
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -56,14 +57,14 @@ var exportableModels = []exportableModelDef{
 	{&model.Log{}, "logs"},
 }
 
+// BackupData is the universal backup format.
+// Version 1: initial format. Each table is stored as a JSON array of model objects.
+// The JSON is human-readable and can be inspected or edited by hand.
+// Future versions: increment version number and keep backward-compatible parsing.
 type BackupData struct {
-	Version    int                `json:"version"`
-	ExportedAt int64              `json:"exported_at"`
-	Tables     map[string][]byte  `json:"tables"`
-}
-
-type BackupRestoreRequest struct {
-	Data BackupData `json:"data"`
+	Version    int                        `json:"version"`
+	ExportedAt int64                      `json:"exported_at"`
+	Tables     map[string]json.RawMessage `json:"tables"`
 }
 
 // ExportBackup exports all tables as a JSON file download. Root only.
@@ -72,16 +73,23 @@ func ExportBackup(c *gin.Context) {
 	out := BackupData{
 		Version:    1,
 		ExportedAt: time.Now().Unix(),
-		Tables:     make(map[string][]byte),
+		Tables:     make(map[string]json.RawMessage),
 	}
 	for _, entry := range exportableModels {
-		var items []map[string]any
-		if err := model.DB.WithContext(ctx).Model(entry.Model).Find(&items).Error; err != nil {
+		// Create a slice of the concrete model type using reflection
+		sliceType := reflect.SliceOf(reflect.TypeOf(entry.Model).Elem())
+		slice := reflect.New(sliceType).Interface()
+		if err := model.DB.WithContext(ctx).Model(entry.Model).Find(slice).Error; err != nil {
 			common.SysLog(fmt.Sprintf("backup export: table %s query failed: %v", entry.Name, err))
 			common.ApiErrorI18n(c, i18n.MsgDatabaseError)
 			return
 		}
-		raw, _ := common.Marshal(items)
+		raw, err := common.Marshal(slice)
+		if err != nil {
+			common.SysLog(fmt.Sprintf("backup export: table %s marshal failed: %v", entry.Name, err))
+			common.ApiErrorI18n(c, i18n.MsgDatabaseError)
+			return
+		}
 		out.Tables[entry.Name] = raw
 	}
 	payload, err := common.Marshal(out)
@@ -138,7 +146,7 @@ func RestoreBackup(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "备份恢复成功"})
 }
 
-func restoreTables(ctx context.Context, tables map[string][]byte) error {
+func restoreTables(ctx context.Context, tables map[string]json.RawMessage) error {
 	for _, entry := range exportableModels {
 		name := entry.Name
 		raw, ok := tables[name]
