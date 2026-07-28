@@ -176,10 +176,6 @@ func Logout(c *gin.Context) {
 }
 
 func Register(c *gin.Context) {
-	if !common.RegisterEnabled {
-		common.ApiErrorI18n(c, i18n.MsgUserRegisterDisabled)
-		return
-	}
 	var req struct {
 		Username         string `json:"username"`
 		Password         string `json:"password"`
@@ -189,6 +185,19 @@ func Register(c *gin.Context) {
 	}
 	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+		return
+	}
+	// If RegisterEnabled is false, only allow registration with a valid invitation code
+	if !common.RegisterEnabled {
+		valid, _ := model.ValidateInvitationCode(req.InvitationCode)
+		if !valid {
+			common.ApiErrorI18n(c, i18n.MsgUserRegisterDisabled)
+			return
+		}
+	}
+	// If PasswordRegisterEnabled is false, still allow registration with invitation code
+	if !common.PasswordRegisterEnabled && req.InvitationCode == "" {
+		common.ApiErrorI18n(c, i18n.MsgUserPasswordRegisterDisabled)
 		return
 	}
 	if err := common.Validate.Struct(&model.User{

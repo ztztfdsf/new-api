@@ -449,11 +449,11 @@ export const useChannelsData = () => {
         break;
       case 'enable':
         data.status = 1;
-        res = await API.put('/api/channel/', data);
+        res = await API.post(`/api/channel/${id}/status`, data);
         break;
       case 'disable':
         data.status = 2;
-        res = await API.put('/api/channel/', data);
+        res = await API.post(`/api/channel/${id}/status`, data);
         break;
       case 'priority':
         if (value === '') return;
