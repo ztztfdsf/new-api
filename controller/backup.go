@@ -16,6 +16,7 @@ import (
 	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // exportableModels defines the ordered list of models for backup/restore.
