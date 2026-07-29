@@ -177,7 +177,9 @@ func restoreTables(ctx context.Context, tables map[string]json.RawMessage) error
 			continue
 		}
 		// Clear existing data in this table before restore - use raw SQL to avoid dialect issues
-		model.DB.WithContext(ctx).Exec("DELETE FROM " + entry.Name)
+		model.DB.WithContext(ctx).Exec("DELETE FROM " + name)
+		// Reset auto-increment counter for primary key
+		resetAutoIncrement(name)
 		// Insert in batches
 		batchSize := 500
 		for i := 0; i < sliceVal.Len(); i += batchSize {
@@ -195,6 +197,17 @@ func restoreTables(ctx context.Context, tables map[string]json.RawMessage) error
 	model.InitChannelCache()
 	model.InitOptionMap()
 	return nil
+}
+
+func resetAutoIncrement(tableName string) {
+	switch {
+	case common.UsingMainDatabase(common.DatabaseTypeSQLite):
+		model.DB.Exec("DELETE FROM sqlite_sequence WHERE name = ?", tableName)
+	case common.UsingMainDatabase(common.DatabaseTypeMySQL):
+		model.DB.Exec("ALTER TABLE " + tableName + " AUTO_INCREMENT = 1")
+	case common.UsingMainDatabase(common.DatabaseTypePostgreSQL):
+		model.DB.Exec("ALTER SEQUENCE " + tableName + "_id_seq RESTART WITH 1")
+	}
 }
 
 // StartLogAutoCleanup starts a daily ticker that auto-deletes old logs.
