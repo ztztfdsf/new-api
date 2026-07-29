@@ -16,7 +16,6 @@ import (
 	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // exportableModels defines the ordered list of models for backup/restore.
@@ -177,8 +176,8 @@ func restoreTables(ctx context.Context, tables map[string]json.RawMessage) error
 		if sliceVal.Len() == 0 {
 			continue
 		}
-		// Clear existing data in this table before restore (hard delete)
-		model.DB.WithContext(ctx).Unscoped().Model(entry.Model).Where("1 = 1").Delete(entry.Model)
+		// Clear existing data in this table before restore - use raw SQL to avoid dialect issues
+		model.DB.WithContext(ctx).Exec("DELETE FROM " + entry.Name)
 		// Insert in batches
 		batchSize := 500
 		for i := 0; i < sliceVal.Len(); i += batchSize {
@@ -187,12 +186,14 @@ func restoreTables(ctx context.Context, tables map[string]json.RawMessage) error
 				end = sliceVal.Len()
 			}
 			batch := sliceVal.Slice(i, end).Interface()
-			// Use session with CreateBatchSize to handle ID conflicts
-			if err := model.DB.WithContext(ctx).Session(&gorm.Session{CreateBatchSize: batchSize}).Model(entry.Model).CreateInBatches(batch, batchSize).Error; err != nil {
+			if err := model.DB.WithContext(ctx).Model(entry.Model).CreateInBatches(batch, batchSize).Error; err != nil {
 				return fmt.Errorf("table %s batch insert failed at offset %d: %w", name, i, err)
 			}
 		}
 	}
+	// Refresh caches after restore
+	model.InitChannelCache()
+	model.InitOptionMap()
 	return nil
 }
 
