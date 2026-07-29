@@ -93,7 +93,7 @@ func ExportBackup(c *gin.Context) {
 		}
 		out.Tables[entry.Name] = raw
 	}
-	payload, err := common.Marshal(out)
+	payload, err := common.MarshalIndent(out)
 	if err != nil {
 		common.SysLog(fmt.Sprintf("backup export: marshal failed: %v", err))
 		common.ApiErrorI18n(c, i18n.MsgDatabaseError)
