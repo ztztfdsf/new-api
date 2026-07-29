@@ -83,8 +83,8 @@ const RestoreStep = ({ setupStatus, next, renderNavigationButtons, t }) => {
       const { success, message } = res.data;
       if (success) {
         Toast.success(t('备份恢复成功！'));
-        setFile(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
+        // 跳转到登录页面
+        window.location.href = '/login';
       } else {
         Toast.error(message || t('恢复失败'));
       }

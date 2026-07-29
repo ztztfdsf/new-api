@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/QuantumNous/new-api/constant"
+	"github.com/google/uuid"
 )
 
 var (
@@ -46,16 +47,9 @@ func InitEnv() {
 		os.Exit(0)
 	}
 
-	if os.Getenv("SESSION_SECRET") != "" {
-		ss := os.Getenv("SESSION_SECRET")
-		if ss == "random_string" {
-			log.Println("WARNING: SESSION_SECRET is set to the default value 'random_string', please change it to a random string.")
-			log.Println("警告：SESSION_SECRET被设置为默认值'random_string'，请修改为随机字符串。")
-			log.Fatal("Please set SESSION_SECRET to a random string.")
-		} else {
-			SessionSecret = ss
-		}
-	}
+	// Load session secret from file for persistence across restarts, or generate and save
+	loadOrGenerateSessionSecret()
+
 	if os.Getenv("CRYPTO_SECRET") != "" {
 		CryptoSecret = os.Getenv("CRYPTO_SECRET")
 	} else {
@@ -129,6 +123,35 @@ func InitEnv() {
 	SearchRateLimitNum = GetEnvOrDefault("SEARCH_RATE_LIMIT", 10)
 	SearchRateLimitDuration = int64(GetEnvOrDefault("SEARCH_RATE_LIMIT_DURATION", 60))
 	initConstantEnv()
+}
+
+// loadOrGenerateSessionSecret loads session secret from a file so session
+// tokens survive server restarts, or generates a new one and saves it.
+// Using SESSION_SECRET env var still takes precedence over the file.
+func loadOrGenerateSessionSecret() {
+	if os.Getenv("SESSION_SECRET") != "" {
+		ss := os.Getenv("SESSION_SECRET")
+		if ss == "random_string" {
+			log.Println("WARNING: SESSION_SECRET is set to the default value 'random_string', please change it to a random string.")
+			log.Println("警告：SESSION_SECRET被设置为默认值'random_string'，请修改为随机字符串。")
+			log.Fatal("Please set SESSION_SECRET to a random string.")
+		}
+		SessionSecret = ss
+		return
+	}
+
+	secretFile := ".session_secret"
+	data, err := os.ReadFile(secretFile)
+	if err == nil && len(data) > 0 {
+		SessionSecret = strings.TrimSpace(string(data))
+		return
+	}
+
+	// Generate a new secret and persist it
+	SessionSecret = uuid.New().String()
+	if err := os.WriteFile(secretFile, []byte(SessionSecret), 0600); err != nil {
+		log.Printf("WARNING: failed to persist session secret to %s: %v", secretFile, err)
+	}
 }
 
 func initConstantEnv() {
