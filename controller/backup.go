@@ -144,6 +144,17 @@ func RestoreBackup(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "恢复失败: " + err.Error()})
 		return
 	}
+	// Mark setup as completed so the frontend redirects to login
+	if !constant.Setup {
+		constant.Setup = true
+		setup := model.Setup{
+			Version:       common.Version,
+			InitializedAt: time.Now().Unix(),
+		}
+		if err := model.DB.Create(&setup).Error; err != nil {
+			common.SysLog(fmt.Sprintf("backup restore: failed to mark setup complete: %v", err))
+		}
+	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "备份恢复成功"})
 }
 
