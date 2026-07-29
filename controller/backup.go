@@ -180,6 +180,18 @@ func restoreTables(ctx context.Context, tables map[string]json.RawMessage) error
 		model.DB.WithContext(ctx).Exec("DELETE FROM " + name)
 		// Reset auto-increment counter for primary key
 		resetAutoIncrement(name)
+		// Zero out Id/ID fields so GORM assigns new auto-increment IDs
+		// (backup records have original IDs which conflict with the sequence)
+		for j := 0; j < sliceVal.Len(); j++ {
+			elem := sliceVal.Index(j)
+			f := elem.FieldByName("Id")
+			if !f.IsValid() || !f.CanSet() {
+				f = elem.FieldByName("ID")
+			}
+			if f.IsValid() && f.CanSet() {
+				f.SetInt(0)
+			}
+		}
 		// Insert in batches
 		batchSize := 500
 		for i := 0; i < sliceVal.Len(); i += batchSize {
