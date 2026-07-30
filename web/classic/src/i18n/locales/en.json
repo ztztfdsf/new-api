@@ -3839,5 +3839,12 @@
   "恢复备份": "Restore backup",
   "请选择 JSON 备份文件": "Please select a JSON backup file",
   "请先选择备份文件": "Please select a backup file first",
-  "备份恢复失败": "Backup restore failed"
+  "备份恢复失败": "Backup restore failed",
+  "注册新账户": "Register New Account",
+  "密码（最短 8 位）": "Password (at least 8 characters)",
+  "去登录": "Go to Login",
+  "请输入用户名和密码": "Please enter username and password",
+  "密码长度不得小于 8 位": "Password must be at least 8 characters",
+  "注册成功！请登录": "Registration successful! Please login",
+  "注册失败，请重试": "Registration failed, please try again"
 }

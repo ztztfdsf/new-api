@@ -37,6 +37,8 @@ import {
   IconPlay,
   IconFile,
   IconCopy,
+  IconUser,
+  IconLock,
 } from '@douyinfe/semi-icons';
 import { Link } from 'react-router-dom';
 import NoticeModal from '../../components/layout/NoticeModal';
@@ -80,6 +82,56 @@ const Home = () => {
   const endpointItems = API_ENDPOINTS.map((e) => ({ value: e }));
   const [endpointIndex, setEndpointIndex] = useState(0);
   const isChinese = i18n.language.startsWith('zh');
+
+  // 注册表单状态
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [registerInputs, setRegisterInputs] = useState({
+    username: '',
+    password: '',
+    password2: '',
+  });
+  const [registerLoading, setRegisterLoading] = useState(false);
+
+  const handleRegisterChange = (name, value) => {
+    setRegisterInputs((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRegisterSubmit = async () => {
+    const { username, password, password2 } = registerInputs;
+    if (!username || !password) {
+      showError(t('请输入用户名和密码'));
+      return;
+    }
+    if (password.length < 8) {
+      showError(t('密码长度不得小于 8 位'));
+      return;
+    }
+    if (password !== password2) {
+      showError(t('两次输入的密码不一致'));
+      return;
+    }
+    setRegisterLoading(true);
+    try {
+      const affCode = localStorage.getItem('aff');
+      const res = await API.post('/api/user/register', {
+        username,
+        password,
+        aff_code: affCode,
+      });
+      const { success, message } = res.data;
+      if (success) {
+        showSuccess(t('注册成功！请登录'));
+        setShowRegisterForm(false);
+        setRegisterInputs({ username: '', password: '', password2: '' });
+      } else {
+        showError(message);
+      }
+    } catch (error) {
+      showError(t('注册失败，请重试'));
+    } finally {
+      setRegisterLoading(false);
+    }
+  };
 
   const displayHomePageContent = async () => {
     setHomePageContent(localStorage.getItem('home_page_content') || '');
@@ -224,6 +276,16 @@ const Home = () => {
                       {t('登录')}
                     </Button>
                   </Link>
+                  <Button
+                    theme='outline'
+                    type='primary'
+                    size={isMobile ? 'default' : 'large'}
+                    className='!rounded-3xl px-8 py-2'
+                    icon={<IconUser />}
+                    onClick={() => setShowRegisterForm(!showRegisterForm)}
+                  >
+                    {t('注册')}
+                  </Button>
                   {isDemoSiteMode && statusState?.status?.version ? (
                     <Button
                       size={isMobile ? 'default' : 'large'}
@@ -251,6 +313,64 @@ const Home = () => {
                     )
                   )}
                 </div>
+
+                {/* 注册表单 */}
+                {showRegisterForm && (
+                  <div className='mt-8 w-full max-w-md mx-auto'>
+                    <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-semi-color-border'>
+                      <h3 className='text-xl font-bold text-center mb-6 text-semi-color-text-0'>
+                        {t('注册新账户')}
+                      </h3>
+                      <div className='space-y-4'>
+                        <Input
+                          placeholder={t('用户名')}
+                          prefix={<IconUser />}
+                          value={registerInputs.username}
+                          onChange={(v) => handleRegisterChange('username', v)}
+                          size='large'
+                          className='!rounded-full'
+                        />
+                        <Input
+                          mode='password'
+                          placeholder={t('密码（最短 8 位）')}
+                          prefix={<IconLock />}
+                          value={registerInputs.password}
+                          onChange={(v) => handleRegisterChange('password', v)}
+                          size='large'
+                          className='!rounded-full'
+                        />
+                        <Input
+                          mode='password'
+                          placeholder={t('确认密码')}
+                          prefix={<IconLock />}
+                          value={registerInputs.password2}
+                          onChange={(v) => handleRegisterChange('password2', v)}
+                          size='large'
+                          className='!rounded-full'
+                        />
+                        <Button
+                          theme='solid'
+                          type='primary'
+                          size='large'
+                          className='w-full !rounded-full'
+                          onClick={handleRegisterSubmit}
+                          loading={registerLoading}
+                        >
+                          {t('注册')}
+                        </Button>
+                        <p className='text-xs text-center text-semi-color-text-2 mt-2'>
+                          {t('已有账户？')}{' '}
+                          <Link
+                            to='/login'
+                            className='text-blue-600 hover:text-blue-800 font-medium'
+                          >
+                            {t('去登录')}
+                          </Link>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* 框架兼容性图标 */}
                 <div className='mt-12 md:mt-16 lg:mt-20 w-full'>
