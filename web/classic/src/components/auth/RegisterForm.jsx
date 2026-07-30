@@ -84,13 +84,6 @@ const RegisterForm = () => {
   const [searchParams] = useSearchParams();
   const invitationCode = searchParams.get('code') || '';
 
-  // 没有邀请码则跳转登录
-  useEffect(() => {
-    if (!invitationCode) {
-      navigate('/login');
-    }
-  }, []);
-
   const { username, password, password2 } = inputs;
   const [userState, userDispatch] = useContext(UserContext);
   const [statusState] = useContext(StatusContext);
