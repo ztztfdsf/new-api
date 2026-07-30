@@ -16,7 +16,6 @@ import (
 	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // exportableModels defines the ordered list of models for backup/restore.
@@ -39,7 +38,7 @@ var exportableModels = []exportableModelDef{
 	{&model.Model{}, "models"},
 	{&model.Vendor{}, "vendors"},
 	{&model.PrefillGroup{}, "prefill_groups"},
-	{&model.Setup{}, "setup"},
+	{&model.Setup{}, "setups"},
 	{&model.TwoFA{}, "two_fa"},
 	{&model.TwoFABackupCode{}, "two_fa_backup_codes"},
 	{&model.Checkin{}, "checkins"},
