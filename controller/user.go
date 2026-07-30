@@ -227,19 +227,21 @@ func Register(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgUserExists)
 		return
 	}
-	// Validate invitation code (required)
-	valid, msgKey := model.ValidateInvitationCode(req.InvitationCode)
-	if !valid {
-		// When password registration is disabled, registration is allowed with a valid invitation code
-		if !common.PasswordRegisterEnabled {
-			common.ApiErrorI18n(c, i18n.MsgUserPasswordRegisterDisabled)
+	// Validate invitation code if provided
+	if req.InvitationCode != "" {
+		valid, msgKey := model.ValidateInvitationCode(req.InvitationCode)
+		if !valid {
+			// When password registration is disabled, registration is allowed with a valid invitation code
+			if !common.PasswordRegisterEnabled {
+				common.ApiErrorI18n(c, i18n.MsgUserPasswordRegisterDisabled)
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": i18n.T(c, msgKey),
+			})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": i18n.T(c, msgKey),
-		})
-		return
 	}
 	invCode, _ := model.GetInvitationByCode(req.InvitationCode)
 	inviterId := 0
