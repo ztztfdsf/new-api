@@ -32,26 +32,29 @@ var exportableModels = []exportableModelDef{
 	{&model.Redemption{}, "redemptions"},
 	{&model.Ability{}, "abilities"},
 	{&model.Midjourney{}, "midjourneys"},
-	{&model.TopUp{}, "topups"},
+	{&model.TopUp{}, "top_ups"},
 	{&model.QuotaData{}, "quota_data"},
 	{&model.Task{}, "tasks"},
 	{&model.Model{}, "models"},
 	{&model.Vendor{}, "vendors"},
 	{&model.PrefillGroup{}, "prefill_groups"},
 	{&model.Setup{}, "setups"},
-	{&model.TwoFA{}, "two_fa"},
+	{&model.TwoFA{}, "two_fas"},
 	{&model.TwoFABackupCode{}, "two_fa_backup_codes"},
 	{&model.Checkin{}, "checkins"},
+	{&model.SubscriptionPlan{}, "subscription_plans"},
 	{&model.SubscriptionOrder{}, "subscription_orders"},
 	{&model.UserSubscription{}, "user_subscriptions"},
 	{&model.SubscriptionPreConsumeRecord{}, "subscription_pre_consume_records"},
 	{&model.CustomOAuthProvider{}, "custom_oauth_providers"},
 	{&model.UserOAuthBinding{}, "user_oauth_bindings"},
 	{&model.PerfMetric{}, "perf_metrics"},
+	{&model.Channel{}, "channels"},
+	{&model.Token{}, "tokens"},
 	{&model.SystemInstance{}, "system_instances"},
 	{&model.SystemTask{}, "system_tasks"},
 	{&model.SystemTaskLock{}, "system_task_locks"},
-	{&model.CasbinRule{}, "casbin_rules"},
+	{&model.CasbinRule{}, "casbin_rule"},
 	{&model.AuthzRole{}, "authz_roles"},
 	{&model.InvitationCode{}, "invitation_codes"},
 	{&model.Log{}, "logs"},
@@ -189,7 +192,12 @@ func restoreTables(ctx context.Context, tables map[string]json.RawMessage) error
 				f = elem.FieldByName("ID")
 			}
 			if f.IsValid() && f.CanSet() {
-				f.SetInt(0)
+				switch f.Kind() {
+				case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+					f.SetInt(0)
+				case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+					f.SetUint(0)
+				}
 			}
 		}
 		// Insert in batches
@@ -214,7 +222,10 @@ func restoreTables(ctx context.Context, tables map[string]json.RawMessage) error
 func resetAutoIncrement(tableName string) {
 	switch {
 	case common.UsingMainDatabase(common.DatabaseTypeSQLite):
-		model.DB.Exec("DELETE FROM sqlite_sequence WHERE name = ?", tableName)
+		// sqlite_sequence may not exist if no auto-increment rows have been inserted yet
+		if err := model.DB.Exec("DELETE FROM sqlite_sequence WHERE name = ?", tableName).Error; err != nil {
+			common.SysLog("backup: sqlite_sequence not available for " + tableName + ": " + err.Error())
+		}
 	case common.UsingMainDatabase(common.DatabaseTypeMySQL):
 		model.DB.Exec("ALTER TABLE " + tableName + " AUTO_INCREMENT = 1")
 	case common.UsingMainDatabase(common.DatabaseTypePostgreSQL):
