@@ -202,7 +202,7 @@ func filterChannelsByRequestPath(channels []int, requestPath string) []int {
 	}
 	filtered := make([]int, 0, len(channels))
 	for _, channelId := range channels {
-		channel, ok := channelsIDM[channelId]
+		_, ok := channelsIDM[channelId]
 		if !ok {
 			// keep it so the downstream consistency error is raised as before
 			filtered = append(filtered, channelId)

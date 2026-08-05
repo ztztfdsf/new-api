@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/QuantumNous/new-api/common"
-	"github.com/QuantumNous/new-api/constant"
 
 	"github.com/samber/lo"
 	"gorm.io/gorm"
@@ -150,38 +149,7 @@ func GetChannel(group string, model string, retry int, requestPath string) (*Cha
 // path-checked: kept only when one of their routes matches requestPath; all other
 // channel types always pass. When requestPath is empty, filtering is skipped.
 func filterAbilitiesByRequestPath(abilities []Ability, requestPath string) []Ability {
-	if requestPath == "" || len(abilities) == 0 {
-		return abilities
-	}
-
-	channelIds := make([]int, 0, len(abilities))
-	seen := make(map[int]struct{}, len(abilities))
-	for _, ability := range abilities {
-		if _, ok := seen[ability.ChannelId]; ok {
-			continue
-		}
-		seen[ability.ChannelId] = struct{}{}
-		channelIds = append(channelIds, ability.ChannelId)
-	}
-
-	var channels []*Channel
-	if err := DB.Where("id IN ?", channelIds).Find(&channels).Error; err != nil {
-		// On error, fall back to unfiltered candidates to avoid blocking selection
-		return abilities
-	}
-
-	filtered := make([]Ability, 0, len(abilities))
-	for _, ability := range abilities {
-		config, isAdvancedCustom := advancedConfigs[ability.ChannelId]
-		if !isAdvancedCustom {
-			filtered = append(filtered, ability)
-			continue
-		}
-		if config != nil && config.SupportsPath(requestPath) {
-			filtered = append(filtered, ability)
-		}
-	}
-	return filtered
+	return abilities
 }
 
 func (channel *Channel) AddAbilities(tx *gorm.DB) error {
