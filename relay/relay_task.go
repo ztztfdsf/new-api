@@ -14,7 +14,6 @@ import (
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/relay/channel"
-	"github.com/QuantumNous/new-api/relay/channel/task/taskcommon"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	relayconstant "github.com/QuantumNous/new-api/relay/constant"
 	"github.com/QuantumNous/new-api/relay/helper"
@@ -423,81 +422,7 @@ func tryRealtimeFetch(task *model.Task, isOpenAIVideoAPI bool) []byte {
 	if err != nil {
 		return nil
 	}
-	if true {
-		return nil
-	}
 
-	baseURL := constant.ChannelBaseURLs[channelModel.Type]
-	if channelModel.GetBaseURL() != "" {
-		baseURL = channelModel.GetBaseURL()
-	}
-	proxy := channelModel.GetSetting().Proxy
-	adaptor := GetTaskAdaptor(constant.TaskPlatform(strconv.Itoa(channelModel.Type)))
-	if adaptor == nil {
-		return nil
-	}
-
-	resp, err := adaptor.FetchTask(baseURL, channelModel.Key, map[string]any{
-		"task_id": task.GetUpstreamTaskID(),
-		"action":  task.Action,
-	}, proxy)
-	if err != nil || resp == nil {
-		return nil
-	}
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil
-	}
-
-	ti, err := adaptor.ParseTaskResult(body)
-	if err != nil || ti == nil {
-		return nil
-	}
-
-	snap := task.Snapshot()
-
-	// 将上游最新状态更新到 task
-	if ti.Status != "" {
-		task.Status = model.TaskStatus(ti.Status)
-	}
-	if ti.Progress != "" {
-		task.Progress = ti.Progress
-	}
-	if strings.HasPrefix(ti.Url, "data:") {
-		// data: URI — kept in Data, not ResultURL
-	} else if ti.Url != "" {
-		task.PrivateData.ResultURL = ti.Url
-	} else if task.Status == model.TaskStatusSuccess {
-		// No URL from adaptor — construct proxy URL using public task ID
-		task.PrivateData.ResultURL = taskcommon.BuildProxyURL(task.TaskID)
-	}
-
-	if !snap.Equal(task.Snapshot()) {
-		_, _ = task.UpdateWithStatus(snap.Status)
-	}
-
-	// OpenAI Video API 由调用者的 ConvertToOpenAIVideo 分支处理
-	if isOpenAIVideoAPI {
-		return nil
-	}
-
-	// 非 OpenAI Video API: 构建自定义格式响应
-	format := detectVideoFormat(body)
-	out := map[string]any{
-		"error":    nil,
-		"format":   format,
-		"metadata": nil,
-		"status":   mapTaskStatusToSimple(task.Status),
-		"task_id":  task.TaskID,
-		"url":      task.GetResultURL(),
-	}
-	respBody, _ := common.Marshal(dto.TaskResponse[any]{
-		Code: "success",
-		Data: out,
-	})
-	return respBody
-}
 
 // detectVideoFormat 从 Gemini/Vertex 原始响应中探测视频格式
 func detectVideoFormat(rawBody []byte) string {
