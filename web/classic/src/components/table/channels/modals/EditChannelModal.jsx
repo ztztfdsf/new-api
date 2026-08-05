@@ -2779,7 +2779,6 @@ const EditChannelModal = (props) => {
                           }
                           extraText={batchExtra}
                         />
-                        </React.Fragment>
                       ) : (
                         <React.Fragment>
                         <KeyInputList
