@@ -210,6 +210,7 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 		}
 		c.Request.Body = io.NopCloser(bodyStorage)
 
+retryRequest:
 		switch relayFormat {
 		case types.RelayFormatOpenAIRealtime:
 			newAPIError = relay.WssHelper(c, relayInfo)
@@ -230,6 +231,26 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 		relayInfo.LastError = newAPIError
 
 		processChannelError(c, *types.NewChannelError(channel.Id, channel.Type, channel.Name, channel.ChannelInfo.IsMultiKey, common.GetContextKeyString(c, constant.ContextKeyChannelKey), channel.GetAutoBan()), newAPIError)
+
+		// Key-level retry: if the channel has multi-key with retry config, try the next key
+		// without incrementing the channel-level retry counter
+		if channel.ChannelInfo.IsMultiKey && channel.ChannelInfo.RetryCount > 0 && relayInfo.RetryIndex < channel.ChannelInfo.RetryCount {
+			nextKey, nextIndex, keyErr := channel.GetNextEnabledKey()
+			if keyErr == nil && nextIndex != common.GetContextKeyInt(c, constant.ContextKeyChannelMultiKeyIndex) {
+				common.SetContextKey(c, constant.ContextKeyChannelKey, nextKey)
+				common.SetContextKey(c, constant.ContextKeyChannelMultiKeyIndex, nextIndex)
+				relayInfo.ApiKey = nextKey
+				relayInfo.RetryIndex++
+				// Reset error and retry with the same channel (new key) - go to relay handler
+				newAPIError = nil
+				bodyStorage, bodyErr := common.GetBodyStorage(c)
+				if bodyErr != nil {
+					break
+				}
+				c.Request.Body = io.NopCloser(bodyStorage)
+				goto retryRequest
+			}
+		}
 
 		if !shouldRetry(c, newAPIError, common.RetryTimes-retryParam.GetRetry()) {
 			break

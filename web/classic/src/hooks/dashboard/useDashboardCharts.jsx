@@ -383,6 +383,39 @@ export const useDashboardCharts = (
     color: { type: 'ordinal', range: USER_COLORS },
   });
 
+  // ========== 用户消耗环形图 ==========
+  const [spec_user_consume, setSpecUserConsume] = useState({
+    type: 'pie',
+    data: [{ id: 'id0', values: [{ type: 'null', value: '0' }] }],
+    outerRadius: 0.8,
+    innerRadius: 0.5,
+    padAngle: 0.6,
+    valueField: 'value',
+    categoryField: 'type',
+    pie: {
+      style: { cornerRadius: 10 },
+      state: {
+        hover: { outerRadius: 0.85, stroke: '#000', lineWidth: 1 },
+        selected: { outerRadius: 0.85, stroke: '#000', lineWidth: 1 },
+      },
+    },
+    title: {
+      visible: true,
+      text: t('用户消耗占比'),
+      subtext: `${t('总计')}：${renderNumber(0)}`,
+    },
+    legends: { visible: true, orient: 'left' },
+    label: { visible: true },
+    tooltip: {
+      mark: {
+        content: [
+          { key: (datum) => datum['type'], value: (datum) => renderQuota(datum['value'], 2) },
+        ],
+      },
+    },
+    color: { type: 'ordinal', range: USER_COLORS },
+  });
+
   // ========== 数据处理函数 ==========
   const generateModelColors = useCallback((uniqueModels, modelColors) => {
     const newModelColors = {};
@@ -603,6 +636,23 @@ export const useDashboardCharts = (
           subtext: `${t('总计')}：${renderQuota(totalUserQuota, 2)}`,
         },
       }));
+
+      // 更新用户消耗环形图
+      const userConsumePieData = rankingData
+        .map((item) => ({
+          type: item.User,
+          value: item.Quota,
+        }))
+        .sort((a, b) => b.value - a.value);
+
+      setSpecUserConsume((prev) => ({
+        ...prev,
+        data: [{ id: 'id0', values: userConsumePieData }],
+        title: {
+          ...prev.title,
+          subtext: `${t('总计')}：${renderQuota(totalUserQuota, 2)}`,
+        },
+      }));
     },
     [dataExportDefaultTime, t],
   );
@@ -621,6 +671,7 @@ export const useDashboardCharts = (
     spec_rank_bar,
     spec_user_rank,
     spec_user_trend,
+    spec_user_consume,
     updateChartData,
     updateUserChartData,
     generateModelColors,

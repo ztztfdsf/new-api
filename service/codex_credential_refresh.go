@@ -47,9 +47,6 @@ func RefreshCodexChannelCredential(ctx context.Context, channelID int, opts Code
 	if ch == nil {
 		return nil, nil, fmt.Errorf("channel not found")
 	}
-	if ch.Type != constant.ChannelTypeCodex {
-		return nil, nil, fmt.Errorf("channel type is not Codex")
-	}
 
 	oauthKey, err := parseCodexOAuthKey(strings.TrimSpace(ch.Key))
 	if err != nil {

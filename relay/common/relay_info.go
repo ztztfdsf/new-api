@@ -211,13 +211,6 @@ func (info *RelayInfo) InitChannelMeta(c *gin.Context) {
 		SupportStreamOptions: false,
 	}
 
-	if channelType == constant.ChannelTypeAzure {
-		channelMeta.ApiVersion = GetAPIVersion(c)
-	}
-	if channelType == constant.ChannelTypeVertexAi {
-		channelMeta.ApiVersion = c.GetString("region")
-	}
-
 	channelSetting, ok := common.GetContextKeyType[dto.ChannelSettings](c, constant.ContextKeyChannelSetting)
 	if ok {
 		channelMeta.ChannelSetting = channelSetting
@@ -318,25 +311,8 @@ func (info *RelayInfo) ToString() string {
 
 // 定义支持流式选项的通道类型
 var streamSupportedChannels = map[int]bool{
-	constant.ChannelTypeOpenAI:         true,
-	constant.ChannelTypeAnthropic:      true,
-	constant.ChannelTypeAws:            true,
-	constant.ChannelTypeGemini:         true,
-	constant.ChannelCloudflare:         true,
-	constant.ChannelTypeAzure:          true,
-	constant.ChannelTypeVolcEngine:     true,
-	constant.ChannelTypeOllama:         true,
-	constant.ChannelTypeXai:            true,
-	constant.ChannelTypeDeepSeek:       true,
-	constant.ChannelTypeBaiduV2:        true,
-	constant.ChannelTypeZhipu_v4:       true,
-	constant.ChannelTypeAli:            true,
-	constant.ChannelTypeSubmodel:       true,
-	constant.ChannelTypeCodex:          true,
-	constant.ChannelTypeMoonshot:       true,
-	constant.ChannelTypeMiniMax:        true,
-	constant.ChannelTypeSiliconFlow:    true,
-	constant.ChannelTypeAdvancedCustom: true,
+	constant.ChannelTypeOpenAI:     true,
+	constant.ChannelTypeClaudeCode: true,
 }
 
 func GenRelayInfoWs(c *gin.Context, ws *websocket.Conn) *RelayInfo {

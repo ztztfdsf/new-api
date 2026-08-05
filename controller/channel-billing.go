@@ -361,33 +361,8 @@ func updateChannelBalance(channel *model.Channel) (float64, error) {
 	if channel.GetBaseURL() == "" {
 		channel.BaseURL = &baseURL
 	}
-	switch channel.Type {
-	case constant.ChannelTypeOpenAI:
-		if channel.GetBaseURL() != "" {
-			baseURL = channel.GetBaseURL()
-		}
-	case constant.ChannelTypeAzure:
-		return 0, errors.New("尚未实现")
-	case constant.ChannelTypeCustom:
+	if channel.GetBaseURL() != "" {
 		baseURL = channel.GetBaseURL()
-	//case common.ChannelTypeOpenAISB:
-	//	return updateChannelOpenAISBBalance(channel)
-	case constant.ChannelTypeAIProxy:
-		return updateChannelAIProxyBalance(channel)
-	case constant.ChannelTypeAPI2GPT:
-		return updateChannelAPI2GPTBalance(channel)
-	case constant.ChannelTypeAIGC2D:
-		return updateChannelAIGC2DBalance(channel)
-	case constant.ChannelTypeSiliconFlow:
-		return updateChannelSiliconFlowBalance(channel)
-	case constant.ChannelTypeDeepSeek:
-		return updateChannelDeepSeekBalance(channel)
-	case constant.ChannelTypeOpenRouter:
-		return updateChannelOpenRouterBalance(channel)
-	case constant.ChannelTypeMoonshot:
-		return updateChannelMoonshotBalance(channel)
-	default:
-		return 0, errors.New("尚未实现")
 	}
 	url := fmt.Sprintf("%s/v1/dashboard/billing/subscription", baseURL)
 

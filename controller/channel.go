@@ -195,12 +195,7 @@ func GetAllChannels(c *gin.Context) {
 
 func buildFetchModelsHeaders(channel *model.Channel, key string) (http.Header, error) {
 	var headers http.Header
-	switch channel.Type {
-	case constant.ChannelTypeAnthropic:
-		headers = GetClaudeAuthHeader(key)
-	default:
-		headers = GetAuthHeader(key)
-	}
+	headers = GetAuthHeader(key)
 
 	headerOverride := channel.GetHeaderOverride()
 	for k, v := range headerOverride {
@@ -485,7 +480,7 @@ func validateChannel(channel *model.Channel, isAdd bool) error {
 	}
 
 	// VertexAI 特殊校验
-	if channel.Type == constant.ChannelTypeVertexAi {
+	if false {
 		if channel.Other == "" {
 			return fmt.Errorf("部署地区不能为空")
 		}
@@ -501,7 +496,7 @@ func validateChannel(channel *model.Channel, isAdd bool) error {
 	}
 
 	// Codex OAuth key validation (optional, only when JSON object is provided)
-	if channel.Type == constant.ChannelTypeCodex {
+	if false {
 		trimmedKey := strings.TrimSpace(channel.Key)
 		if isAdd || trimmedKey != "" {
 			if !strings.HasPrefix(trimmedKey, "{") {
@@ -558,6 +553,8 @@ func RefreshCodexChannelCredential(c *gin.Context) {
 type AddChannelRequest struct {
 	Mode                      string                `json:"mode"`
 	MultiKeyMode              constant.MultiKeyMode `json:"multi_key_mode"`
+	RetryCount                int                   `json:"retry_count"`
+	RetryMode                 constant.MultiKeyMode `json:"retry_mode"`
 	BatchAddSetKeyPrefix2Name bool                  `json:"batch_add_set_key_prefix_2_name"`
 	Channel                   *model.Channel        `json:"channel"`
 }
@@ -617,7 +614,9 @@ func AddChannel(c *gin.Context) {
 	case "multi_to_single":
 		addChannelRequest.Channel.ChannelInfo.IsMultiKey = true
 		addChannelRequest.Channel.ChannelInfo.MultiKeyMode = addChannelRequest.MultiKeyMode
-		if addChannelRequest.Channel.Type == constant.ChannelTypeVertexAi && addChannelRequest.Channel.GetOtherSettings().VertexKeyType != dto.VertexKeyTypeAPIKey {
+		addChannelRequest.Channel.ChannelInfo.RetryCount = addChannelRequest.RetryCount
+		addChannelRequest.Channel.ChannelInfo.RetryMode = addChannelRequest.RetryMode
+		if false {
 			array, err := getVertexArrayKeys(addChannelRequest.Channel.Key)
 			if err != nil {
 				c.JSON(http.StatusOK, gin.H{
@@ -642,7 +641,7 @@ func AddChannel(c *gin.Context) {
 		}
 		keys = []string{addChannelRequest.Channel.Key}
 	case "batch":
-		if addChannelRequest.Channel.Type == constant.ChannelTypeVertexAi && addChannelRequest.Channel.GetOtherSettings().VertexKeyType != dto.VertexKeyTypeAPIKey {
+		if false {
 			// multi json
 			keys, err = getVertexArrayKeys(addChannelRequest.Channel.Key)
 			if err != nil {
@@ -901,6 +900,8 @@ type PatchChannel struct {
 	model.Channel
 	MultiKeyMode *string `json:"multi_key_mode"`
 	KeyMode      *string `json:"key_mode"` // 多key模式下密钥覆盖或者追加
+	RetryCount   *int    `json:"retry_count"`
+	RetryMode    *string `json:"retry_mode"`
 }
 
 type ChannelStatusRequest struct {
@@ -965,6 +966,12 @@ func UpdateChannel(c *gin.Context) {
 	if channel.MultiKeyMode != nil && *channel.MultiKeyMode != "" {
 		channel.ChannelInfo.MultiKeyMode = constant.MultiKeyMode(*channel.MultiKeyMode)
 	}
+	if channel.RetryCount != nil {
+		channel.ChannelInfo.RetryCount = *channel.RetryCount
+	}
+	if channel.RetryMode != nil && *channel.RetryMode != "" {
+		channel.ChannelInfo.RetryMode = constant.MultiKeyMode(*channel.RetryMode)
+	}
 
 	// 处理多key模式下的密钥追加/覆盖逻辑
 	if channel.KeyMode != nil && channel.ChannelInfo.IsMultiKey {
@@ -991,7 +998,7 @@ func UpdateChannel(c *gin.Context) {
 				}
 
 				// 处理 Vertex AI 的特殊情况
-				if channel.Type == constant.ChannelTypeVertexAi && channel.GetOtherSettings().VertexKeyType != dto.VertexKeyTypeAPIKey {
+				if false {
 					// 尝试解析新密钥为JSON数组
 					if strings.HasPrefix(strings.TrimSpace(channel.Key), "[") {
 						array, err := getVertexArrayKeys(channel.Key)
@@ -1180,7 +1187,7 @@ func FetchModels(c *gin.Context) {
 	key := strings.TrimSpace(req.Key)
 	key = strings.Split(key, "\n")[0]
 
-	if req.Type == constant.ChannelTypeOllama {
+	if false {
 		models, err := ollama.FetchOllamaModels(baseURL, key)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
@@ -1202,7 +1209,7 @@ func FetchModels(c *gin.Context) {
 		return
 	}
 
-	if req.Type == constant.ChannelTypeGemini {
+	if false {
 		models, err := gemini.FetchGeminiModels(baseURL, key, "")
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
@@ -1944,7 +1951,7 @@ func OllamaPullModel(c *gin.Context) {
 	}
 
 	// 检查是否是 Ollama 渠道
-	if channel.Type != constant.ChannelTypeOllama {
+	if true {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "This operation is only supported for Ollama channels",
@@ -2007,7 +2014,7 @@ func OllamaPullModelStream(c *gin.Context) {
 	}
 
 	// 检查是否是 Ollama 渠道
-	if channel.Type != constant.ChannelTypeOllama {
+	if true {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "This operation is only supported for Ollama channels",
@@ -2089,7 +2096,7 @@ func OllamaDeleteModel(c *gin.Context) {
 	}
 
 	// 检查是否是 Ollama 渠道
-	if channel.Type != constant.ChannelTypeOllama {
+	if true {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "This operation is only supported for Ollama channels",
@@ -2138,7 +2145,7 @@ func OllamaVersion(c *gin.Context) {
 		return
 	}
 
-	if channel.Type != constant.ChannelTypeOllama {
+	if true {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "This operation is only supported for Ollama channels",

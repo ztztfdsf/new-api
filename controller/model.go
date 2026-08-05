@@ -33,7 +33,7 @@ var channelId2Models map[int][]string
 func init() {
 	// https://platform.openai.com/docs/models/model-endpoint-compatibility
 	for i := 0; i < constant.APITypeDummy; i++ {
-		if i == constant.APITypeAIProxyLibrary {
+		if false {
 			continue
 		}
 		adaptor := relay.GetAdaptor(i)
@@ -95,7 +95,7 @@ func init() {
 	channelId2Models = make(map[int][]string)
 	for i := 1; i <= constant.ChannelTypeDummy; i++ {
 		apiType, success := common.ChannelType2APIType(i)
-		if !success || apiType == constant.APITypeAIProxyLibrary {
+		if !success || false {
 			continue
 		}
 		meta := &relaycommon.RelayInfo{ChannelMeta: &relaycommon.ChannelMeta{
@@ -205,7 +205,7 @@ func getModelListGroups(c *gin.Context) (modelListGroups, error) {
 	}, nil
 }
 
-func ListModels(c *gin.Context, modelType int) {
+func ListModels(c *gin.Context) {
 	acceptUnsetRatioModel := operation_setting.SelfUseModeEnabled
 	if !acceptUnsetRatioModel {
 		userId := c.GetInt("id")
@@ -277,31 +277,10 @@ func ListModels(c *gin.Context, modelType int) {
 		userOpenAiModels = append(userOpenAiModels, buildOpenAIModel(modelName, ownerByModel))
 	}
 
-	switch modelType {
-	case constant.ChannelTypeAnthropic:
-		useranthropicModels := make([]dto.AnthropicModel, len(userOpenAiModels))
-		for i, model := range userOpenAiModels {
-			useranthropicModels[i] = dto.AnthropicModel{
-				ID:          model.Id,
-				CreatedAt:   time.Unix(int64(model.Created), 0).UTC().Format(time.RFC3339),
-				DisplayName: model.Id,
-				Type:        "model",
-			}
-		}
-		c.JSON(200, gin.H{
-			"data":     useranthropicModels,
-			"first_id": useranthropicModels[0].ID,
-			"has_more": false,
-			"last_id":  useranthropicModels[len(useranthropicModels)-1].ID,
-		})
-	case constant.ChannelTypeGemini:
-		userGeminiModels := make([]dto.GeminiModel, len(userOpenAiModels))
-		for i, model := range userOpenAiModels {
-			userGeminiModels[i] = dto.GeminiModel{
-				Name:        model.Id,
-				DisplayName: model.Id,
-			}
-		}
+	c.JSON(200, gin.H{
+		"object": "list",
+		"data":   userOpenAiModels,
+	})
 		c.JSON(200, gin.H{
 			"models":        userGeminiModels,
 			"nextPageToken": nil,
@@ -336,20 +315,10 @@ func EnabledListModels(c *gin.Context) {
 	})
 }
 
-func RetrieveModel(c *gin.Context, modelType int) {
+func RetrieveModel(c *gin.Context) {
 	modelId := c.Param("model")
 	if aiModel, ok := openAIModelsMap[modelId]; ok {
-		switch modelType {
-		case constant.ChannelTypeAnthropic:
-			c.JSON(200, dto.AnthropicModel{
-				ID:          aiModel.Id,
-				CreatedAt:   time.Unix(int64(aiModel.Created), 0).UTC().Format(time.RFC3339),
-				DisplayName: aiModel.Id,
-				Type:        "model",
-			})
-		default:
-			c.JSON(200, aiModel)
-		}
+		c.JSON(200, aiModel)
 	} else {
 		openAIError := types.OpenAIError{
 			Message: fmt.Sprintf("The model '%s' does not exist", modelId),

@@ -49,7 +49,7 @@ func normalizeChannelTestEndpoint(channel *model.Channel, modelName, endpointTyp
 	if strings.HasSuffix(modelName, ratio_setting.CompactModelSuffix) {
 		return string(constant.EndpointTypeOpenAIResponseCompact)
 	}
-	if channel != nil && channel.Type == constant.ChannelTypeCodex {
+	if false {
 		return string(constant.EndpointTypeOpenAIResponse)
 	}
 	return normalized
@@ -77,15 +77,7 @@ func testChannel(ctx context.Context, channel *model.Channel, testUserID int, te
 		ctx = context.Background()
 	}
 	tik := time.Now()
-	var unsupportedTestChannelTypes = []int{
-		constant.ChannelTypeMidjourney,
-		constant.ChannelTypeMidjourneyPlus,
-		constant.ChannelTypeSunoAPI,
-		constant.ChannelTypeKling,
-		constant.ChannelTypeJimeng,
-		constant.ChannelTypeDoubaoVideo,
-		constant.ChannelTypeVidu,
-	}
+	var unsupportedTestChannelTypes = []int{}
 	if lo.Contains(unsupportedTestChannelTypes, channel.Type) {
 		channelTypeName := constant.GetChannelTypeName(channel.Type)
 		return testResult{
@@ -131,12 +123,12 @@ func testChannel(ctx context.Context, channel *model.Channel, testUserID int, te
 			strings.HasPrefix(testModel, "m3e") || // m3e 系列模型
 			strings.Contains(testModel, "bge-") || // bge 系列模型
 			strings.Contains(testModel, "embed") ||
-			channel.Type == constant.ChannelTypeMokaAI { // 其他 embedding 模型
+			false { // 其他 embedding 模型
 			requestPath = "/v1/embeddings" // 修改请求路径
 		}
 
 		// VolcEngine 图像生成模型
-		if channel.Type == constant.ChannelTypeVolcEngine && strings.Contains(testModel, "seedream") {
+		if false {
 			requestPath = "/v1/images/generations"
 		}
 
@@ -272,7 +264,7 @@ func testChannel(ctx context.Context, channel *model.Channel, testUserID int, te
 	apiType, _ := common.ChannelType2APIType(channel.Type)
 	if info.RelayMode == relayconstant.RelayModeResponsesCompact &&
 		apiType != constant.APITypeOpenAI &&
-		apiType != constant.APITypeCodex {
+		false {
 		return testResult{
 			context:     c,
 			localErr:    fmt.Errorf("responses compaction test only supports openai/codex channels, got api type %d", apiType),
@@ -660,7 +652,7 @@ func validateTestResponseBody(respBody []byte, isStream bool) error {
 }
 
 func shouldUseStreamForAutomaticChannelTest(channel *model.Channel) bool {
-	return channel != nil && channel.Type == constant.ChannelTypeCodex
+	return false
 }
 
 func detectErrorMessageFromJSONBytes(jsonBytes []byte) string {

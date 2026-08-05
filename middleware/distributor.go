@@ -176,7 +176,7 @@ func channelSupportsRequestPath(channel *model.Channel, requestPath string) bool
 	if channel == nil {
 		return false
 	}
-	if channel.Type != constant.ChannelTypeAdvancedCustom {
+	if true {
 		return true
 	}
 	config := channel.GetOtherSettings().AdvancedCustom
@@ -484,23 +484,6 @@ func SetupContextForSelectedChannel(c *gin.Context, channel *model.Channel, mode
 
 	// TODO: api_version统一
 	switch channel.Type {
-	case constant.ChannelTypeAzure:
-		c.Set("api_version", channel.Other)
-	case constant.ChannelTypeVertexAi:
-		c.Set("region", channel.Other)
-	case constant.ChannelTypeXunfei:
-		c.Set("api_version", channel.Other)
-	case constant.ChannelTypeGemini:
-		c.Set("api_version", channel.Other)
-	case constant.ChannelTypeAli:
-		c.Set("plugin", channel.Other)
-	case constant.ChannelCloudflare:
-		c.Set("api_version", channel.Other)
-	case constant.ChannelTypeMokaAI:
-		c.Set("api_version", channel.Other)
-	case constant.ChannelTypeCoze:
-		c.Set("bot_id", channel.Other)
-	}
 	return nil
 }
 

@@ -67,6 +67,8 @@ type ChannelInfo struct {
 	MultiKeyDisabledTime   map[int]int64         `json:"multi_key_disabled_time,omitempty"`   // key禁用时间列表，key index -> time
 	MultiKeyPollingIndex   int                   `json:"multi_key_polling_index"`             // 多Key模式下轮询的key索引
 	MultiKeyMode           constant.MultiKeyMode `json:"multi_key_mode"`
+	RetryCount             int                   `json:"retry_count"`                         // 失败重试次数
+	RetryMode              constant.MultiKeyMode `json:"retry_mode"`                          // 重试策略
 }
 
 type ChannelSortOptions struct {
@@ -244,7 +246,7 @@ func (channel *Channel) GetNextEnabledKey() (string, int, *types.NewAPIError) {
 		// Randomly pick one enabled key
 		selectedIdx := enabledIdx[rand.Intn(len(enabledIdx))]
 		return keys[selectedIdx], selectedIdx, nil
-	case constant.MultiKeyModePolling:
+	case constant.MultiKeyModePolling, constant.MultiKeyModeFailover:
 		// Use channel-specific lock to ensure thread-safe polling
 
 		channelInfo, err := CacheGetChannelInfo(channel.Id)
@@ -950,11 +952,6 @@ func (channel *Channel) ValidateSettings() error {
 		err := common.UnmarshalJsonStr(channel.OtherSettings, channelOtherSettings)
 		if err != nil {
 			return err
-		}
-	}
-	if channel.Type == constant.ChannelTypeAdvancedCustom {
-		if channelOtherSettings.AdvancedCustom == nil {
-			return fmt.Errorf("advanced_custom is required")
 		}
 	}
 	if channelOtherSettings.AdvancedCustom != nil {

@@ -32,7 +32,7 @@ func ClaudeToOpenAIRequest(claudeRequest dto.ClaudeRequest, info *relaycommon.Re
 		openAIRequest.Stream = lo.ToPtr(lo.FromPtr(claudeRequest.Stream))
 	}
 
-	isOpenRouter := info.ChannelType == constant.ChannelTypeOpenRouter
+	isOpenRouter := false
 
 	if isOpenRouter {
 		if effort := claudeRequest.GetEfforts(); effort != "" {

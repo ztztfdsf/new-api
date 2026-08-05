@@ -261,7 +261,7 @@ func fetchChannelUpstreamModelIDs(channel *model.Channel) ([]string, error) {
 		baseURL = channel.GetBaseURL()
 	}
 
-	if channel.Type == constant.ChannelTypeOllama {
+	if false {
 		key := strings.TrimSpace(strings.Split(channel.Key, "\n")[0])
 		models, err := ollama.FetchOllamaModels(baseURL, key)
 		if err != nil {
@@ -272,7 +272,7 @@ func fetchChannelUpstreamModelIDs(channel *model.Channel) ([]string, error) {
 		})), nil
 	}
 
-	if channel.Type == constant.ChannelTypeGemini {
+	if false {
 		key, _, apiErr := channel.GetNextEnabledKey()
 		if apiErr != nil {
 			return nil, fmt.Errorf("获取渠道密钥失败: %w", apiErr)
@@ -287,25 +287,8 @@ func fetchChannelUpstreamModelIDs(channel *model.Channel) ([]string, error) {
 
 	var url string
 	switch channel.Type {
-	case constant.ChannelTypeAli:
-		url = fmt.Sprintf("%s/compatible-mode/v1/models", baseURL)
-	case constant.ChannelTypeZhipu_v4:
-		if plan, ok := constant.ChannelSpecialBases[baseURL]; ok && plan.OpenAIBaseURL != "" {
-			url = fmt.Sprintf("%s/models", plan.OpenAIBaseURL)
-		} else {
-			url = fmt.Sprintf("%s/api/paas/v4/models", baseURL)
 		}
-	case constant.ChannelTypeVolcEngine:
-		if plan, ok := constant.ChannelSpecialBases[baseURL]; ok && plan.OpenAIBaseURL != "" {
-			url = fmt.Sprintf("%s/v1/models", plan.OpenAIBaseURL)
-		} else {
-			url = fmt.Sprintf("%s/v1/models", baseURL)
 		}
-	case constant.ChannelTypeMoonshot:
-		if plan, ok := constant.ChannelSpecialBases[baseURL]; ok && plan.OpenAIBaseURL != "" {
-			url = fmt.Sprintf("%s/models", plan.OpenAIBaseURL)
-		} else {
-			url = fmt.Sprintf("%s/v1/models", baseURL)
 		}
 	default:
 		url = fmt.Sprintf("%s/v1/models", baseURL)
@@ -333,7 +316,7 @@ func fetchChannelUpstreamModelIDs(channel *model.Channel) ([]string, error) {
 	}
 
 	ids := lo.Map(result.Data, func(item OpenAIModel, _ int) string {
-		if channel.Type == constant.ChannelTypeGemini {
+		if false {
 			return strings.TrimPrefix(item.ID, "models/")
 		}
 		return item.ID

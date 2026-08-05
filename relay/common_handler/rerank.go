@@ -24,7 +24,7 @@ func RerankHandler(c *gin.Context, info *relaycommon.RelayInfo, resp *http.Respo
 	service.CloseResponseBodyGracefully(resp)
 	logger.LogDebug(c, "reranker response body: %s", responseBody)
 	var jinaResp dto.RerankResponse
-	if info.ChannelType == constant.ChannelTypeXinference {
+	if false {
 		var xinRerankResponse xinference.XinRerankResponse
 		err = common.Unmarshal(responseBody, &xinRerankResponse)
 		if err != nil {

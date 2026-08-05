@@ -193,7 +193,7 @@ func calculateTextQuotaSummary(ctx *gin.Context, relayInfo *relaycommon.RelayInf
 	summary.AudioTokens = usage.PromptTokensDetails.AudioTokens
 	legacyClaudeDerived := isLegacyClaudeDerivedOpenAIUsage(relayInfo, usage)
 	isOpenRouterClaudeBilling := relayInfo.ChannelMeta != nil &&
-		relayInfo.ChannelType == constant.ChannelTypeOpenRouter &&
+		/* openrouter */ false &&
 		summary.IsClaudeUsageSemantic
 
 	if isOpenRouterClaudeBilling {

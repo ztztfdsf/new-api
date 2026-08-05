@@ -65,6 +65,7 @@ import JSONEditor from '../../../common/ui/JSONEditor';
 import SecureVerificationModal from '../../../common/modals/SecureVerificationModal';
 import StatusCodeRiskGuardModal from './StatusCodeRiskGuardModal';
 import ChannelKeyDisplay from '../../../common/ui/ChannelKeyDisplay';
+import KeyInputList from './KeyInputList';
 import { useSecureVerification } from '../../../../hooks/common/useSecureVerification';
 import { parseChannelConnectionString } from '../../../../helpers/token';
 import { createApiCalls } from '../../../../services/secureVerification';
@@ -187,6 +188,8 @@ const EditChannelModal = (props) => {
     weight: 0,
     tag: '',
     multi_key_mode: 'random',
+    retry_count: 0,
+    retry_mode: 'polling',
     // 渠道额外设置的默认值
     force_format: false,
     thinking_to_content: false,
@@ -248,6 +251,7 @@ const EditChannelModal = (props) => {
   const [channelSearchValue, setChannelSearchValue] = useState('');
   const [useManualInput, setUseManualInput] = useState(false); // 是否使用手动输入模式
   const [keyMode, setKeyMode] = useState('append'); // 密钥模式：replace（覆盖）或 append（追加）
+  const [keyList, setKeyList] = useState(['']); // 多密钥输入列表
   const [isEnterpriseAccount, setIsEnterpriseAccount] = useState(false); // 是否为企业账户
   const [doubaoApiEditUnlocked, setDoubaoApiEditUnlocked] = useState(false); // 豆包渠道自定义 API 地址隐藏入口
   const redirectModelList = useMemo(() => {
@@ -599,6 +603,26 @@ const EditChannelModal = (props) => {
 
   const isIonetLocked = isIonetChannel && isEdit;
 
+  // 初始化 keyList 从 inputs.key（仅在首次加载时）
+  const keyListInitialized = useRef(false);
+  useEffect(() => {
+    if (!keyListInitialized.current && inputs.key) {
+      const keys = inputs.key.split('\n').filter(k => k.trim() !== '');
+      setKeyList(keys.length > 0 ? keys : ['']);
+      keyListInitialized.current = true;
+    } else if (!keyListInitialized.current && !inputs.key) {
+      setKeyList(['']);
+      keyListInitialized.current = true;
+    }
+  }, [inputs.key]);
+
+  const handleKeyListChange = (newKeys) => {
+    setKeyList(newKeys);
+    // 将 key 数组用 \n 连接，更新 inputs.key
+    const joined = newKeys.filter(k => k.trim() !== '').join('\n');
+    handleInputChange('key', joined);
+  };
+
   const handleInputChange = (name, value) => {
     if (
       isIonetChannel &&
@@ -851,6 +875,8 @@ const EditChannelModal = (props) => {
         const modeVal = chInfo.multi_key_mode || 'random';
         setMultiKeyMode(modeVal);
         data.multi_key_mode = modeVal;
+        data.retry_count = chInfo.retry_count || 0;
+        data.retry_mode = chInfo.retry_mode || 'polling';
       } else {
         setBatch(false);
         setMultiToSingle(false);
@@ -1867,6 +1893,8 @@ const EditChannelModal = (props) => {
       res = await API.post(`/api/channel/`, {
         mode: mode,
         multi_key_mode: mode === 'multi_to_single' ? multiKeyMode : undefined,
+        retry_count: mode === 'multi_to_single' ? inputs.retry_count : undefined,
+        retry_mode: mode === 'multi_to_single' ? inputs.retry_mode : undefined,
         channel: localInputs,
       });
     }
@@ -2752,54 +2780,20 @@ const EditChannelModal = (props) => {
                           extraText={batchExtra}
                         />
                       ) : (
-                        <Form.TextArea
-                          field='key'
-                          label={t('密钥')}
-                          placeholder={
-                            inputs.type === 33
-                              ? inputs.aws_key_type === 'api_key'
-                                ? t(
-                                    '请输入 API Key，一行一个，格式：APIKey|Region',
-                                  )
-                                : t(
-                                    '请输入密钥，一行一个，格式：AccessKey|SecretAccessKey|Region',
-                                  )
-                              : t('请输入密钥，一行一个')
-                          }
-                          rules={
-                            isEdit
-                              ? []
-                              : [{ required: true, message: t('请输入密钥') }]
-                          }
-                          autosize
-                          autoComplete='new-password'
-                          onChange={(value) => handleInputChange('key', value)}
+                        <KeyInputList
+                          keys={keyList}
+                          onKeysChange={handleKeyListChange}
                           disabled={isIonetLocked}
-                          extraText={
-                            <div className='flex items-center gap-2 flex-wrap'>
-                              {isEdit &&
-                                isMultiKeyChannel &&
-                                keyMode === 'append' && (
-                                  <Text type='warning' size='small'>
-                                    {t(
-                                      '追加模式：新密钥将添加到现有密钥列表的末尾',
-                                    )}
-                                  </Text>
-                                )}
-                              {isEdit && (
-                                <Button
-                                  size='small'
-                                  type='primary'
-                                  theme='outline'
-                                  onClick={handleShow2FAModal}
-                                >
-                                  {t('查看密钥')}
-                                </Button>
-                              )}
-                              {batchExtra}
-                            </div>
-                          }
-                          showClear
+                          isEdit={isEdit}
+                          isMultiKeyChannel={isMultiKeyChannel}
+                          keyMode={keyMode}
+                          handleShow2FAModal={handleShow2FAModal}
+                          batchExtra={batchExtra}
+                          t={t}
+                        />
+                        <Form.Input
+                          field='key'
+                          style={{ display: 'none' }}
                         />
                       )
                     ) : (
@@ -3109,11 +3103,12 @@ const EditChannelModal = (props) => {
                       <>
                         <Form.Select
                           field='multi_key_mode'
-                          label={t('密钥聚合模式')}
+                          label={t('密钥调用策略')}
                           placeholder={t('请选择多密钥使用策略')}
                           optionList={[
                             { label: t('随机'), value: 'random' },
                             { label: t('轮询'), value: 'polling' },
+                            { label: t('故障转移'), value: 'failover' },
                           ]}
                           style={{ width: '100%' }}
                           value={inputs.multi_key_mode || 'random'}
@@ -3131,6 +3126,38 @@ const EditChannelModal = (props) => {
                             className='!rounded-lg mt-2'
                           />
                         )}
+                        {inputs.multi_key_mode === 'failover' && (
+                          <Banner
+                            type='info'
+                            description={t(
+                              '故障转移模式：当一个密钥返回错误时，自动标记为不可用并切换到下一个健康密钥',
+                            )}
+                            className='!rounded-lg mt-2'
+                          />
+                        )}
+                        <Form.InputNumber
+                          field='retry_count'
+                          label={t('失败重试次数')}
+                          placeholder={t('默认 0，表示不重试')}
+                          style={{ width: '100%' }}
+                          min={0}
+                          max={10}
+                          value={inputs.retry_count || 0}
+                          onChange={(value) => handleInputChange('retry_count', value)}
+                        />
+                        <Form.Select
+                          field='retry_mode'
+                          label={t('重试策略')}
+                          placeholder={t('请选择重试策略')}
+                          optionList={[
+                            { label: t('顺序重试'), value: 'polling' },
+                            { label: t('随机重试'), value: 'random' },
+                            { label: t('故障转移'), value: 'failover' },
+                          ]}
+                          style={{ width: '100%' }}
+                          value={inputs.retry_mode || 'polling'}
+                          onChange={(value) => handleInputChange('retry_mode', value)}
+                        />
                       </>
                     )}
 

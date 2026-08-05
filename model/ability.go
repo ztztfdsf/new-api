@@ -8,7 +8,6 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
-	"github.com/QuantumNous/new-api/dto"
 
 	"github.com/samber/lo"
 	"gorm.io/gorm"
@@ -169,13 +168,6 @@ func filterAbilitiesByRequestPath(abilities []Ability, requestPath string) []Abi
 	if err := DB.Where("id IN ?", channelIds).Find(&channels).Error; err != nil {
 		// On error, fall back to unfiltered candidates to avoid blocking selection
 		return abilities
-	}
-
-	advancedConfigs := make(map[int]*dto.AdvancedCustomConfig)
-	for _, channel := range channels {
-		if channel.Type == constant.ChannelTypeAdvancedCustom {
-			advancedConfigs[channel.Id] = channel.GetOtherSettings().AdvancedCustom
-		}
 	}
 
 	filtered := make([]Ability, 0, len(abilities))
