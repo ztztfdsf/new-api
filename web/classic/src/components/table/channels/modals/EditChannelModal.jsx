@@ -2779,7 +2779,9 @@ const EditChannelModal = (props) => {
                           }
                           extraText={batchExtra}
                         />
+                        </>
                       ) : (
+                        <>
                         <KeyInputList
                           keys={keyList}
                           onKeysChange={handleKeyListChange}
@@ -2795,6 +2797,7 @@ const EditChannelModal = (props) => {
                           field='key'
                           style={{ display: 'none' }}
                         />
+                        </>
                       )
                     ) : (
                       <>
