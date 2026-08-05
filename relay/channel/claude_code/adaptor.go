@@ -1,7 +1,6 @@
 package claude_code
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -9,7 +8,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/QuantumNous/new-api/common"
+	"encoding/json"
+
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/relay/channel"
 	"github.com/QuantumNous/new-api/relay/channel/claude"
@@ -79,7 +79,10 @@ func (a *Adaptor) ConvertOpenAIRequest(c *gin.Context, info *relaycommon.RelayIn
 	}
 
 	// Build Claude Code specific request
-	ccReq := buildClaudeCodeRequest(c, claudeReq, info)
+	ccReq, err := buildClaudeCodeRequest(c, claudeReq, info)
+	if err != nil {
+		return nil, fmt.Errorf("claude code: build request failed: %w", err)
+	}
 	return ccReq, nil
 }
 
