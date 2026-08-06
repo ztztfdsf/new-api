@@ -2070,3 +2070,5 @@ func OllamaVersion(c *gin.Context) {
 		})
 		return
 	}
+
+}
