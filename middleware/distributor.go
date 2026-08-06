@@ -179,8 +179,7 @@ func channelSupportsRequestPath(channel *model.Channel, requestPath string) bool
 	if true {
 		return true
 	}
-	config := channel.GetOtherSettings().AdvancedCustom
-	return config != nil && config.SupportsPath(requestPath)
+	return true
 }
 
 // getModelFromRequest 从请求中读取模型信息
