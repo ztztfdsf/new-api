@@ -17,13 +17,10 @@ import (
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/relay/channel"
 
-	"github.com/QuantumNous/new-api/relay/channel/openrouter"
-	"github.com/QuantumNous/new-api/relay/channel/xinference"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	"github.com/QuantumNous/new-api/relay/common_handler"
 	relayconstant "github.com/QuantumNous/new-api/relay/constant"
 	"github.com/QuantumNous/new-api/service"
-	"github.com/QuantumNous/new-api/setting/model_setting"
 	"github.com/QuantumNous/new-api/setting/reasoning"
 	"github.com/QuantumNous/new-api/types"
 	"github.com/samber/lo"
