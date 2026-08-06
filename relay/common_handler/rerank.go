@@ -23,12 +23,11 @@ func RerankHandler(c *gin.Context, info *relaycommon.RelayInfo, resp *http.Respo
 	logger.LogDebug(c, "reranker response body: %s", responseBody)
 	var jinaResp dto.RerankResponse
 
-		err = common.Unmarshal(responseBody, &jinaResp)
-		if err != nil {
-			return nil, types.NewOpenAIError(err, types.ErrorCodeBadResponseBody, http.StatusInternalServerError)
-		}
-		jinaResp.Usage.PromptTokens = jinaResp.Usage.TotalTokens
+	err = common.Unmarshal(responseBody, &jinaResp)
+	if err != nil {
+		return nil, types.NewOpenAIError(err, types.ErrorCodeBadResponseBody, http.StatusInternalServerError)
 	}
+	jinaResp.Usage.PromptTokens = jinaResp.Usage.TotalTokens
 
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.JSON(http.StatusOK, jinaResp)
