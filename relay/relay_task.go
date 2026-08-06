@@ -422,7 +422,9 @@ func tryRealtimeFetch(task *model.Task, isOpenAIVideoAPI bool) []byte {
 	if err != nil {
 		return nil
 	}
-
+	_ = channelModel
+	return nil
+}
 
 // detectVideoFormat 从 Gemini/Vertex 原始响应中探测视频格式
 func detectVideoFormat(rawBody []byte) string {
