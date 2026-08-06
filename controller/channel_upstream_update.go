@@ -14,7 +14,6 @@ import (
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/model"
-	"github.com/QuantumNous/new-api/relay/channel/gemini"
 	"github.com/QuantumNous/new-api/service"
 
 	"github.com/gin-gonic/gin"
@@ -260,35 +259,11 @@ func fetchChannelUpstreamModelIDs(channel *model.Channel) ([]string, error) {
 		baseURL = channel.GetBaseURL()
 	}
 
-	if false {
-		key := strings.TrimSpace(strings.Split(channel.Key, "\n")[0])
-		models, err := ollama.FetchOllamaModels(baseURL, key)
-		if err != nil {
-			return nil, err
-		}
-		return normalizeModelNames(lo.Map(models, func(item ollama.OllamaModel, _ int) string {
-			return item.Name
-		})), nil
-	}
 
-	if false {
-		key, _, apiErr := channel.GetNextEnabledKey()
-		if apiErr != nil {
-			return nil, fmt.Errorf("获取渠道密钥失败: %w", apiErr)
-		}
-		key = strings.TrimSpace(key)
-		models, err := gemini.FetchGeminiModels(baseURL, key, channel.GetSetting().Proxy)
-		if err != nil {
-			return nil, err
-		}
-		return normalizeModelNames(models), nil
-	}
+
 
 	var url string
 	switch channel.Type {
-		}
-		}
-		}
 	default:
 		url = fmt.Sprintf("%s/v1/models", baseURL)
 	}
