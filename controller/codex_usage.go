@@ -72,8 +72,6 @@ func fetchCodexChannelWhamData(
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "channel not found"})
 		return
 	}
-		return
-	}
 	if ch.ChannelInfo.IsMultiKey {
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "multi-key channel is not supported"})
 		return

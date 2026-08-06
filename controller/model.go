@@ -277,17 +277,6 @@ func ListModels(c *gin.Context) {
 		"object": "list",
 		"data":   userOpenAiModels,
 	})
-		c.JSON(200, gin.H{
-			"models":        userGeminiModels,
-			"nextPageToken": nil,
-		})
-	default:
-		c.JSON(200, gin.H{
-			"success": true,
-			"data":    userOpenAiModels,
-			"object":  "list",
-		})
-	}
 }
 
 func ChannelListModels(c *gin.Context) {
