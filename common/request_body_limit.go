@@ -2,7 +2,7 @@ package common
 
 import "github.com/QuantumNous/new-api/constant"
 
-const defaultAnonymousRequestBodyLimitKB = 512
+const defaultAnonymousRequestBodyLimitKB = 8192
 
 func GetAnonymousRequestBodyLimitBytes() int64 {
 	limitKB := constant.AnonymousRequestBodyLimitKB
