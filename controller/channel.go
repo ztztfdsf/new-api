@@ -1185,44 +1185,9 @@ func FetchModels(c *gin.Context) {
 	key := strings.TrimSpace(req.Key)
 	key = strings.Split(key, "\n")[0]
 
-	if false {
-		models, err := ollama.FetchOllamaModels(baseURL, key)
-		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": fmt.Sprintf("获取Ollama模型失败: %s", err.Error()),
-			})
-			return
-		}
 
-		names := make([]string, 0, len(models))
-		for _, modelInfo := range models {
-			names = append(names, modelInfo.Name)
-		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"success": true,
-			"data":    names,
-		})
-		return
-	}
 
-	if false {
-		models, err := gemini.FetchGeminiModels(baseURL, key, "")
-		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": fmt.Sprintf("获取Gemini模型失败: %s", err.Error()),
-			})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"success": true,
-			"data":    models,
-		})
-		return
-	}
 
 	client := &http.Client{}
 	url := fmt.Sprintf("%s/v1/models", baseURL)
@@ -1939,7 +1904,7 @@ func OllamaPullModel(c *gin.Context) {
 	}
 
 	// 获取渠道信息
-	channel, err := model.GetChannelById(req.ChannelID, true)
+	_, err := model.GetChannelById(req.ChannelID, true)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -1981,7 +1946,7 @@ func OllamaPullModelStream(c *gin.Context) {
 	}
 
 	// 获取渠道信息
-	channel, err := model.GetChannelById(req.ChannelID, true)
+	_, err := model.GetChannelById(req.ChannelID, true)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -2023,7 +1988,7 @@ func OllamaDeleteModel(c *gin.Context) {
 	}
 
 	// 获取渠道信息
-	channel, err := model.GetChannelById(req.ChannelID, true)
+	_, err := model.GetChannelById(req.ChannelID, true)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -2052,7 +2017,7 @@ func OllamaVersion(c *gin.Context) {
 		return
 	}
 
-	channel, err := model.GetChannelById(id, true)
+	_, err := model.GetChannelById(id, true)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,

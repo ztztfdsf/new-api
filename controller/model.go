@@ -44,38 +44,6 @@ func init() {
 			})
 		}
 	}
-	for _, modelName := range ai360.ModelList {
-		openAIModels = append(openAIModels, dto.OpenAIModels{
-			Id:      modelName,
-			Object:  "model",
-			Created: 1626777600,
-			OwnedBy: ai360.ChannelName,
-		})
-	}
-	for _, modelName := range moonshot.ModelList {
-		openAIModels = append(openAIModels, dto.OpenAIModels{
-			Id:      modelName,
-			Object:  "model",
-			Created: 1626777600,
-			OwnedBy: moonshot.ChannelName,
-		})
-	}
-	for _, modelName := range lingyiwanwu.ModelList {
-		openAIModels = append(openAIModels, dto.OpenAIModels{
-			Id:      modelName,
-			Object:  "model",
-			Created: 1626777600,
-			OwnedBy: lingyiwanwu.ChannelName,
-		})
-	}
-	for _, modelName := range minimax.ModelList {
-		openAIModels = append(openAIModels, dto.OpenAIModels{
-			Id:      modelName,
-			Object:  "model",
-			Created: 1626777600,
-			OwnedBy: minimax.ChannelName,
-		})
-	}
 	for modelName, _ := range constant.MidjourneyModel2Action {
 		openAIModels = append(openAIModels, dto.OpenAIModels{
 			Id:      modelName,
