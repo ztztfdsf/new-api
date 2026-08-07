@@ -199,6 +199,7 @@ const Dashboard = () => {
             handleInputChange={dashboardData.handleInputChange}
             inputs={dashboardData.inputs}
             loadData={dashboardData.loadQuotaData}
+            refreshData={handleRefresh}
             t={dashboardData.t}
           />
 

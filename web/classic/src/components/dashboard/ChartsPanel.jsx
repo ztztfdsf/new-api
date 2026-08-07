@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Card, Button, Typography, Tabs, TabPane } from '@douyinfe/semi-ui';
 import { IconChevronLeft, IconChevronRight } from '@douyinfe/semi-icons';
 import { PieChart } from 'lucide-react';
@@ -19,10 +19,28 @@ const ChartsPanel = ({
   handleInputChange,
   inputs,
   loadData,
+  refreshData,
   t,
 }) => {
   // 当前激活的 tab
   const [activeTab, setActiveTab] = useState('consume');
+
+  // 日期切换后自动刷新（跳过首次渲染）
+  const prevStartTs = useRef(inputs?.start_timestamp);
+  useEffect(() => {
+    if (
+      prevStartTs.current !== undefined &&
+      inputs?.start_timestamp &&
+      inputs.start_timestamp !== prevStartTs.current
+    ) {
+      prevStartTs.current = inputs.start_timestamp;
+      if (refreshData) {
+        refreshData();
+      }
+    } else {
+      prevStartTs.current = inputs?.start_timestamp;
+    }
+  }, [inputs?.start_timestamp, refreshData]);
 
   // 日期导航
   const today = new Date();

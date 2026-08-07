@@ -95,6 +95,8 @@ export const useDashboardCharts = (
     },
     label: {
       visible: true,
+      position: 'outside',
+      formatMethod: (text, datum) => renderNumber(datum['value']),
     },
     tooltip: {
       mark: {
@@ -405,7 +407,12 @@ export const useDashboardCharts = (
       subtext: `${t('总计')}：${renderNumber(0)}`,
     },
     legends: { visible: true, orient: 'left' },
-    label: { visible: true },
+    label: {
+      visible: true,
+      position: 'outside',
+      formatMethod: (text, datum) =>
+        renderQuota(datum['value'], 2),
+    },
     tooltip: {
       mark: {
         content: [
