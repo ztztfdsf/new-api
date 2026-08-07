@@ -11,7 +11,6 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
-	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/model"
 	relaychannel "github.com/QuantumNous/new-api/relay/channel"
@@ -2017,7 +2016,7 @@ func OllamaVersion(c *gin.Context) {
 		return
 	}
 
-	_, err := model.GetChannelById(id, true)
+	_, err = model.GetChannelById(id, true)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
