@@ -527,24 +527,19 @@ export const getChannelsColumns = ({
                 </Tooltip>
                 <Tooltip
                   content={
-                    record.type === 57
-                      ? t('查看 Codex 帐号信息与用量')
-                      : t('剩余额度') +
-                        ': ' +
-                        renderQuotaWithAmount(record.balance) +
-                        t('，点击更新')
+                    t('剩余额度') +
+                    ': ' +
+                    renderQuotaWithAmount(record.balance) +
+                    t('，点击更新')
                   }
                 >
                   <Tag
-                    color={record.type === 57 ? 'light-blue' : 'white'}
-                    type={record.type === 57 ? 'light' : 'ghost'}
+                    color='white'
+                    type='ghost'
                     shape='circle'
-                    className={record.type === 57 ? 'cursor-pointer' : ''}
                     onClick={() => updateChannelBalance(record)}
                   >
-                    {record.type === 57
-                      ? t('帐号信息')
-                      : renderQuotaWithAmount(record.balance)}
+                    {renderQuotaWithAmount(record.balance)}
                   </Tag>
                 </Tooltip>
               </Space>
@@ -750,15 +745,6 @@ export const getChannelsColumns = ({
                     : 'remove',
                 );
               },
-            });
-          }
-
-          if (record.type === 4) {
-            moreMenuItems.unshift({
-              node: 'item',
-              name: t('测活'),
-              type: 'tertiary',
-              onClick: () => checkOllamaVersion(record),
             });
           }
 

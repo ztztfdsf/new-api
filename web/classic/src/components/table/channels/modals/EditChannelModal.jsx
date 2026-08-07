@@ -135,7 +135,7 @@ const MODEL_FETCHABLE_TYPES = new Set([
 ]);
 
 function type2secretPrompt(type) {
-  // inputs.type === 15 ? '按照如下格式输入：APIKey|SecretKey' : (inputs.type === 18 ? '按照如下格式输入：APPID|APISecret|APIKey' : '请输入渠道对应的鉴权密钥')
+  // inputs.type === -1 ? '按照如下格式输入：APIKey|SecretKey' : (inputs.type === -1 ? '按照如下格式输入：APPID|APISecret|APIKey' : '请输入渠道对应的鉴权密钥')
   switch (type) {
     case 15:
       return '按照如下格式输入：APIKey|SecretKey';
@@ -991,7 +991,7 @@ const EditChannelModal = (props) => {
       }
 
       if (
-        data.type === 45 &&
+        data.type === -1 &&
         (!data.base_url ||
           (typeof data.base_url === 'string' && data.base_url.trim() === ''))
       ) {
@@ -1565,7 +1565,7 @@ const EditChannelModal = (props) => {
     let localInputs = { ...formValues };
     localInputs.param_override = inputs.param_override;
 
-    if (localInputs.type === 57) {
+    if (localInputs.type === -1) {
       if (batch) {
         showInfo(t('Codex 渠道不支持批量创建'));
         return;
@@ -1606,7 +1606,7 @@ const EditChannelModal = (props) => {
       }
     }
 
-    if (localInputs.type === 41) {
+    if (localInputs.type === -1) {
       const keyType = localInputs.vertex_key_type || 'json';
       if (keyType === 'api_key') {
         // 直接作为普通字符串密钥处理
@@ -1679,7 +1679,7 @@ const EditChannelModal = (props) => {
       return;
     }
     if (
-      localInputs.type === 45 &&
+      localInputs.type === -1 &&
       (!localInputs.base_url || localInputs.base_url.trim() === '')
     ) {
       showInfo(t('请输入API地址！'));
@@ -1761,7 +1761,7 @@ const EditChannelModal = (props) => {
         localInputs.base_url.length - 1,
       );
     }
-    if (localInputs.type === 18 && localInputs.other === '') {
+    if (localInputs.type === -1 && localInputs.other === '') {
       localInputs.other = 'v2.1';
     }
 
@@ -1786,26 +1786,26 @@ const EditChannelModal = (props) => {
       }
     }
 
-    // type === 20: 设置企业账户标识，无论是true还是false都要传到后端
-    if (localInputs.type === 20) {
+    // type === -1: 设置企业账户标识，无论是true还是false都要传到后端
+    if (localInputs.type === -1) {
       settings.openrouter_enterprise =
         localInputs.is_enterprise_account === true;
     }
 
-    // type === 33 (AWS): 保存 aws_key_type 到 settings
-    if (localInputs.type === 33) {
+    // type === -1 (AWS): 保存 aws_key_type 到 settings
+    if (localInputs.type === -1) {
       settings.aws_key_type = localInputs.aws_key_type || 'ak_sk';
     }
 
-    // type === 41 (Vertex): 始终保存 vertex_key_type 到 settings，避免编辑时被重置
-    if (localInputs.type === 41) {
+    // type === -1 (Vertex): 始终保存 vertex_key_type 到 settings，避免编辑时被重置
+    if (localInputs.type === -1) {
       settings.vertex_key_type = localInputs.vertex_key_type || 'json';
     } else if ('vertex_key_type' in settings) {
       delete settings.vertex_key_type;
     }
 
-    // type === 1 (OpenAI) 或 type === 14 (Claude): 设置字段透传控制（显式保存布尔值）
-    if (localInputs.type === 1 || localInputs.type === 14) {
+    // type === 1 (OpenAI) 或 type === -1 (Claude): 设置字段透传控制（显式保存布尔值）
+    if (localInputs.type === 1 || localInputs.type === -1) {
       settings.allow_service_tier = localInputs.allow_service_tier === true;
       // 仅 OpenAI 渠道需要 store / safety_identifier / include_obfuscation
       if (localInputs.type === 1) {
@@ -1815,7 +1815,7 @@ const EditChannelModal = (props) => {
         settings.allow_include_obfuscation =
           localInputs.allow_include_obfuscation === true;
       }
-      if (localInputs.type === 14) {
+      if (localInputs.type === -1) {
         settings.allow_inference_geo = localInputs.allow_inference_geo === true;
         settings.allow_speed = localInputs.allow_speed === true;
         settings.claude_beta_query = localInputs.claude_beta_query === true;
@@ -2044,7 +2044,7 @@ const EditChannelModal = (props) => {
             } else {
               // 批量模式下禁用手动输入，并清空手动输入的内容
               setUseManualInput(false);
-              if (inputs.type === 41) {
+              if (inputs.type === -1) {
                 // 清空手动输入的密钥内容
                 if (formApiRef.current) {
                   formApiRef.current.setValue('key', '');
@@ -2518,7 +2518,7 @@ const EditChannelModal = (props) => {
                     </>
                   )}
 
-                  {inputs.type === 14 && (
+                  {inputs.type === -1 && (
                     <>
                       <div className='mt-4 mb-2 text-sm font-medium text-gray-700'>
                         {t('字段透传控制')}
@@ -2536,7 +2536,7 @@ const EditChannelModal = (props) => {
                     {t('额外设置')}
                   </Text>
 
-                  {inputs.type === 14 && (
+                  {inputs.type === -1 && (
                     <Form.Switch field='claude_beta_query' label={t('Claude 强制 beta=true')} checkedText={t('开')} uncheckedText={t('关')} onChange={(value) => handleChannelOtherSettingsChange('claude_beta_query', value)} extraText={t('开启后，该渠道请求 Claude 时将强制追加 ?beta=true（无需客户端手动传参）')} />
                   )}
 
@@ -2649,7 +2649,7 @@ const EditChannelModal = (props) => {
                       disabled={isIonetLocked}
                     />
 
-                    {inputs.type === 57 && (
+                    {inputs.type === -1 && (
                       <Banner
                         type='warning'
                         closeIcon={null}
@@ -2660,7 +2660,7 @@ const EditChannelModal = (props) => {
                       />
                     )}
 
-                    {inputs.type === 20 && (
+                    {inputs.type === -1 && (
                       <Form.Switch
                         field='is_enterprise_account'
                         label={t('是否为企业账户')}
@@ -2687,7 +2687,7 @@ const EditChannelModal = (props) => {
                       autoComplete='new-password'
                     />
 
-                    {inputs.type === 33 && (
+                    {inputs.type === -1 && (
                       <>
                         <Form.Select
                           field='aws_key_type'
@@ -2715,7 +2715,7 @@ const EditChannelModal = (props) => {
                       </>
                     )}
 
-                    {inputs.type === 41 && (
+                    {inputs.type === -1 && (
                       <Form.Select
                         field='vertex_key_type'
                         label={t('密钥格式')}
@@ -2751,7 +2751,7 @@ const EditChannelModal = (props) => {
                       />
                     )}
                     {batch ? (
-                      inputs.type === 41 &&
+                      inputs.type === -1 &&
                       (inputs.vertex_key_type || 'json') === 'json' ? (
                         <Form.Upload
                           field='vertex_files'
@@ -2800,7 +2800,7 @@ const EditChannelModal = (props) => {
                       )
                     ) : (
                       <>
-                        {inputs.type === 57 ? (
+                        {inputs.type === -1 ? (
                           <>
                             <Form.TextArea
                               field='key'
@@ -2876,7 +2876,7 @@ const EditChannelModal = (props) => {
                               showClear
                             />
                           </>
-                        ) : inputs.type === 41 &&
+                        ) : inputs.type === -1 &&
                           (inputs.vertex_key_type || 'json') === 'json' ? (
                           <>
                             {!batch && (
@@ -3033,7 +3033,7 @@ const EditChannelModal = (props) => {
                                 : t('密钥')
                             }
                             placeholder={
-                              inputs.type === 33
+                              inputs.type === -1
                                 ? inputs.aws_key_type === 'api_key'
                                   ? t('请输入 API Key，格式：APIKey|Region')
                                   : t(
@@ -3163,7 +3163,7 @@ const EditChannelModal = (props) => {
                       </>
                     )}
 
-                    {inputs.type === 18 && (
+                    {inputs.type === -1 && (
                       <Form.Input
                         field='other'
                         label={t('模型版本')}
@@ -3175,7 +3175,7 @@ const EditChannelModal = (props) => {
                       />
                     )}
 
-                    {inputs.type === 41 && (
+                    {inputs.type === -1 && (
                       <JSONEditor
                         key={`region-${isEdit ? channelId : 'new'}`}
                         field='other'
@@ -3196,7 +3196,7 @@ const EditChannelModal = (props) => {
                       />
                     )}
 
-                    {inputs.type === 21 && (
+                    {inputs.type === -1 && (
                       <Form.Input
                         field='other'
                         label={t('知识库 ID')}
@@ -3206,7 +3206,7 @@ const EditChannelModal = (props) => {
                       />
                     )}
 
-                    {inputs.type === 39 && (
+                    {inputs.type === -1 && (
                       <Form.Input
                         field='other'
                         label='Account ID'
@@ -3218,7 +3218,7 @@ const EditChannelModal = (props) => {
                       />
                     )}
 
-                    {inputs.type === 49 && (
+                    {inputs.type === -1 && (
                       <Form.Input
                         field='other'
                         label={t('智能体ID')}
@@ -3245,7 +3245,7 @@ const EditChannelModal = (props) => {
                   {showApiConfigCard && (
                     <div onClick={handleApiConfigSecretClick}>
 
-                      {inputs.type === 40 && (
+                      {inputs.type === -1 && (
                         <Banner
                           type='info'
                           description={
@@ -3269,7 +3269,7 @@ const EditChannelModal = (props) => {
                         />
                       )}
 
-                      {inputs.type === 3 && (
+                      {inputs.type === -1 && (
                         <>
                           <Banner
                             type='warning'
@@ -3324,7 +3324,7 @@ const EditChannelModal = (props) => {
                         </>
                       )}
 
-                      {inputs.type === 8 && (
+                      {inputs.type === -1 && (
                         <>
                           <Banner
                             type='warning'
@@ -3350,7 +3350,7 @@ const EditChannelModal = (props) => {
                         </>
                       )}
 
-                      {inputs.type === 37 && (
+                      {inputs.type === -1 && (
                         <Banner
                           type='warning'
                           description={t(
@@ -3384,7 +3384,7 @@ const EditChannelModal = (props) => {
                           </div>
                         )}
 
-                      {inputs.type === 22 && (
+                      {inputs.type === -1 && (
                         <div>
                           <Form.Input
                             field='base_url'
@@ -3401,7 +3401,7 @@ const EditChannelModal = (props) => {
                         </div>
                       )}
 
-                      {inputs.type === 36 && (
+                      {inputs.type === -1 && (
                         <div>
                           <Form.Input
                             field='base_url'
@@ -3420,7 +3420,7 @@ const EditChannelModal = (props) => {
                         </div>
                       )}
 
-                      {inputs.type === 45 && !doubaoApiEditUnlocked && (
+                      {inputs.type === -1 && !doubaoApiEditUnlocked && (
                         <div>
                           <Form.Select
                             field='base_url'
@@ -3528,7 +3528,7 @@ const EditChannelModal = (props) => {
                             position='bottomRight'
                             menu={[
                               { node: 'item', name: t('填入所有模型'), onClick: () => handleInputChange('models', fullModels) },
-                              ...(inputs.type === 4 && isEdit ? [{ node: 'item', name: t('Ollama 模型管理'), onClick: () => setOllamaModalVisible(true) }] : []),
+                              ...(inputs.type === -1 && isEdit ? [{ node: 'item', name: t('Ollama 模型管理'), onClick: () => setOllamaModalVisible(true) }] : []),
                               { node: 'divider' },
                               { node: 'item', name: t('复制所有模型'), onClick: () => {
                                 if (inputs.models.length === 0) { showInfo(t('没有模型可以复制')); return; }
