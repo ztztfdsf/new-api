@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Card, Button, Typography, Space } from '@douyinfe/semi-ui';
+import { Card, Button, Typography, Tabs, TabPane } from '@douyinfe/semi-ui';
 import { IconChevronLeft, IconChevronRight } from '@douyinfe/semi-icons';
 import { PieChart } from 'lucide-react';
 import { VChart } from '@visactor/react-vchart';
@@ -21,6 +21,9 @@ const ChartsPanel = ({
   loadData,
   t,
 }) => {
+  // 当前激活的 tab
+  const [activeTab, setActiveTab] = useState('consume');
+
   // 日期导航
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(() => {
@@ -80,54 +83,76 @@ const ChartsPanel = ({
       {...CARD_PROPS}
       className={`!rounded-2xl ${hasApiInfoPanel ? 'lg:col-span-3' : ''}`}
       title={
-        <div className={FLEX_CENTER_GAP2}>
-          <PieChart size={16} />
-          {t('每日报告')}
+        <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between w-full gap-3'>
+          <div className={FLEX_CENTER_GAP2}>
+            <PieChart size={16} />
+            {t('模型数据分析')}
+          </div>
+          <Tabs
+            type='slash'
+            activeKey={activeTab}
+            onChange={setActiveTab}
+          >
+            <TabPane tab={<span>{t('模型消耗')}</span>} itemKey='consume' />
+            <TabPane tab={<span>{t('每日报告')}</span>} itemKey='report' />
+          </Tabs>
         </div>
       }
       bodyStyle={{ padding: 0 }}
     >
-      {/* 日期导航 */}
-      <div className='flex items-center justify-center gap-3 pt-4 pb-2'>
-        <Button
-          icon={<IconChevronLeft />}
-          size='small'
-          theme='borderless'
-          onClick={goPrevDay}
-        />
-        <Button
-          size='small'
-          theme='borderless'
-          onClick={goToday}
-          type={isToday ? 'primary' : 'tertiary'}
-        >
-          <Text strong style={{ fontSize: 16, minWidth: 100, textAlign: 'center' }}>
-            {dateStr}
-          </Text>
-        </Button>
-        <Button
-          icon={<IconChevronRight />}
-          size='small'
-          theme='borderless'
-          onClick={goNextDay}
-          disabled={isToday}
-        />
-      </div>
-
-      {/* 消耗分布 */}
-      <div className='h-64 p-2'>
-        <VChart spec={spec_line} option={CHART_CONFIG} />
-      </div>
-
-      {/* 两个环形图 */}
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-2 p-2'>
-        <div className='h-64'>
-          <VChart spec={spec_pie} option={CHART_CONFIG} />
+      {activeTab === 'consume' ? (
+        /* ===== 模型消耗：消耗分布柱状图（时间颗粒度天） ===== */
+        <div className='h-96 p-2'>
+          <VChart spec={spec_line} option={CHART_CONFIG} />
         </div>
-        <div className='h-64'>
-          <VChart spec={spec_user_consume} option={CHART_CONFIG} />
+      ) : (
+        /* ===== 每日报告：日期导航 + 两个环形图 ===== */
+        <div>
+          {/* 日期导航 */}
+          <div className='flex items-center justify-center gap-3 pt-4 pb-2'>
+            <Button
+              icon={<IconChevronLeft />}
+              size='small'
+              theme='borderless'
+              onClick={goPrevDay}
+            />
+            <Button
+              size='small'
+              theme='borderless'
+              onClick={goToday}
+              type={isToday ? 'primary' : 'tertiary'}
+            >
+              <Text
+                strong
+                style={{
+                  fontSize: 16,
+                  minWidth: 100,
+                  textAlign: 'center',
+                }}
+              >
+                {dateStr}
+              </Text>
+            </Button>
+            <Button
+              icon={<IconChevronRight />}
+              size='small'
+              theme='borderless'
+              onClick={goNextDay}
+              disabled={isToday}
+            />
+          </div>
+
+          {/* 两个环形图 */}
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-2 p-2'>
+            <div className='h-72'>
+              <VChart spec={spec_pie} option={CHART_CONFIG} />
+            </div>
+            <div className='h-72'>
+              <VChart spec={spec_user_consume} option={CHART_CONFIG} />
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </Card>
   );
 };
