@@ -20,7 +20,6 @@ func SetRelayRouter(router *gin.Engine) {
 	modelsRouter.Use(middleware.TokenAuth())
 	{
 		modelsRouter.GET("", func(c *gin.Context) {
-			switch {
 			controller.ListModels(c)
 		})
 
